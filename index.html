@@ -437,7 +437,7 @@ function render() {
 
   grid.innerHTML = filtered.map(e => {
     const mvHtml = e.mv ? `<span class="mv">${escHtml(e.mv)}</span>` : '';
-    return `<span class="word-item">${highlight(e.w, q, activeMode)}${mvHtml}</span>`;
+    return `<span class="word-item"><span>${highlight(e.w, q, activeMode)}</span>${mvHtml}</span>`;
   }).join('');
 }
 
