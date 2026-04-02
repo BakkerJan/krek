@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Urker Woordenboek</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f0f4f8;
+      color: #1a2332;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stripe-band {
+      display: block;
+      width: 100%;
+      line-height: 0;
+    }
+
+    .stripe-band svg {
+      display: block;
+      width: 100%;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0d3b6e 0%, #1565a8 60%, #1e90c3 100%);
+      color: white;
+      padding: 2rem 1.5rem 1.75rem;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(13,59,110,0.3);
+    }
+
+    header h1 {
+      font-size: clamp(1.4rem, 4vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.3rem;
+    }
+
+    header p {
+      font-size: 0.95rem;
+      opacity: 0.82;
+    }
+
+    .wave {
+      display: block;
+      width: 100%;
+      height: 28px;
+      background: #f0f4f8;
+      clip-path: ellipse(55% 100% at 50% 100%);
+    }
+
+    main {
+      flex: 1;
+      max-width: 1000px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.25rem 1rem 2.5rem;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      align-items: stretch;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b7a90;
+      pointer-events: none;
+    }
+
+    #search {
+      width: 100%;
+      height: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.6rem;
+      font-size: 1rem;
+      border: 2px solid #c9d6e3;
+      border-radius: 9px;
+      background: white;
+      color: #1a2332;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    #search:focus {
+      border-color: #1565a8;
+      box-shadow: 0 0 0 3px rgba(21,101,168,0.14);
+    }
+
+    .mode-group {
+      display: flex;
+      border: 2px solid #c9d6e3;
+      border-radius: 9px;
+      overflow: hidden;
+      background: white;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 0 0.85rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: white;
+      border: none;
+      border-right: 1px solid #c9d6e3;
+      color: #6b7a90;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .mode-btn:last-child { border-right: none; }
+    .mode-btn:hover { background: #f0f4f8; color: #1565a8; }
+    .mode-btn.active { background: #1565a8; color: white; }
+
+    .letters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-bottom: 1rem;
+    }
+
+    .letter-btn {
+      padding: 0.28rem 0.55rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: 2px solid #c9d6e3;
+      border-radius: 6px;
+      background: white;
+      color: #4a5568;
+      cursor: pointer;
+      min-width: 30px;
+      text-align: center;
+      transition: all 0.15s;
+    }
+
+    .letter-btn:hover { border-color: #1565a8; color: #1565a8; }
+    .letter-btn.active { background: #1565a8; border-color: #1565a8; color: white; }
+
+    .count-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      margin-bottom: 0.75rem;
+      font-size: 0.88rem;
+      color: #4a5568;
+    }
+
+    #count { font-weight: 600; color: #1565a8; }
+
+    #reset-btn {
+      font-size: 0.85rem;
+      background: none;
+      border: none;
+      color: #1565a8;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    #word-grid {
+      columns: 3;
+      column-gap: 0.6rem;
+    }
+
+    @media (max-width: 600px) {
+      #word-grid { columns: 2; }
+      .mode-btn { padding: 0 0.5rem; font-size: 0.75rem; }
+    }
+
+    .word-item {
+      break-inside: avoid;
+      background: white;
+      border: 1.5px solid #dde4ef;
+      border-radius: 7px;
+      padding: 0.45rem 0.8rem;
+      margin-bottom: 0.45rem;
+      font-size: 0.93rem;
+      color: #0d3b6e;
+      font-weight: 500;
+      display: block;
+      transition: border-color 0.12s, box-shadow 0.12s;
+    }
+
+    .word-item:hover {
+      border-color: #1565a8;
+      box-shadow: 0 2px 6px rgba(21,101,168,0.1);
+    }
+
+    mark {
+      background: #fde68a;
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+
+    #empty {
+      display: none;
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #6b7a90;
+    }
+
+    #empty svg {
+      opacity: 0.3;
+      margin-bottom: 0.75rem;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem 1rem 1.25rem;
+      font-size: 0.8rem;
+      color: #9aa5b4;
+      background: #e8edf4;
+    }
+  </style>
+</head>
+<body>
+
+<div class="stripe-band"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="20" preserveAspectRatio="none">
+  <rect y="0"    width="100%" height="4.5" fill="#e2001a"/>
+  <rect y="4.5"  width="100%" height="1"   fill="#ffffff"/>
+  <rect y="5.5"  width="100%" height="4.5" fill="#e2001a"/>
+  <rect y="10"   width="100%" height="3"   fill="#ffffff"/>
+  <rect y="13"   width="100%" height="1.5" fill="#1a171b"/>
+  <rect y="14.5" width="100%" height="1"   fill="#ffffff"/>
+  <rect y="15.5" width="100%" height="1.5" fill="#1a171b"/>
+  <rect y="17"   width="100%" height="3"   fill="#ffffff"/>
+</svg></div>
+
+<header>
+  <h1>Urker Woordenboek</h1>
+  <p>Woorden in het Urker dialect</p>
+</header>
+<span class="wave" aria-hidden="true"></span>
+
+<main>
+  <div class="search-row">
+    <div class="search-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input id="search" type="search" placeholder="Zoek een woord&#x2026;" autocomplete="off" autofocus />
+    </div>
+    <div class="mode-group">
+      <button class="mode-btn" data-mode="bevat">Bevat</button>
+      <button class="mode-btn active" data-mode="begint">Begint met</button>
+      <button class="mode-btn" data-mode="eindigt">Eindigt op</button>
+    </div>
+  </div>
+
+  <div class="letters" id="letters"></div>
+
+  <div class="count-bar">
+    <span><span id="count">0</span> woorden</span>
+    <button id="reset-btn" style="display:none">Wis filter</button>
+  </div>
+
+  <div id="word-grid"></div>
+  <div id="empty">
+    <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <p>Geen woorden gevonden voor &#x201C;<span id="empty-query"></span>&#x201D;</p>
+  </div>
+</main>
+
+<footer>
+  <div class="stripe-band" style="margin-bottom:0.85rem"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="20" preserveAspectRatio="none">
+  <rect y="0"    width="100%" height="4.5" fill="#e2001a"/>
+  <rect y="4.5"  width="100%" height="1"   fill="#ffffff"/>
+  <rect y="5.5"  width="100%" height="4.5" fill="#e2001a"/>
+  <rect y="10"   width="100%" height="3"   fill="#ffffff"/>
+  <rect y="13"   width="100%" height="1.5" fill="#1a171b"/>
+  <rect y="14.5" width="100%" height="1"   fill="#ffffff"/>
+  <rect y="15.5" width="100%" height="1.5" fill="#1a171b"/>
+  <rect y="17"   width="100%" height="3"   fill="#ffffff"/>
+</svg></div>
+  Urker taalschat &mdash; 5,803 woorden
+</footer>
+
+<script>
+const WORDS = ["aak", "aakster", "aals", "aanangwagentjen", "aand", "aandbeskilderd", "aandig", "aandkarre", "aanrecht", "aans", "aansen", "aanstalten", "aanstoens", "aanwiezige", "aar", "aarbaor", "aarbaore", "aarbied", "aarbiedig", "aard", "aardaags", "aarde", "aardedonker", "aarder", "aardere", "aargister", "aarlijk", "aarlijke", "aarlijkeid", "aarsen", "abbekras", "abeus", "achteran", "achterbinkien", "achterblever", "achterduur", "achtereus", "achterin", "achterkaand", "achterlaotend", "achternao", "achteromme", "achterskip", "achtersteat", "achterstevuren", "achterstraot", "achterzealtjen", "achttienvoesaak", "ad", "adde", "adden", "advertintie", "affekaot", "affer", "affereande", "afferenteus", "affereus", "afferlaand", "affersteven", "affijn", "after", "afteran", "afterduur", "afteren", "aftereus", "afterkaant", "afternao", "afteroofd", "afterste", "aftersten", "afterstraot", "agel", "agelbuitjen", "agierde", "agieren", "aken", "aker", "akertouw", "akkaozie", "akke", "akkelappe", "akken", "ala", "alangal", "alarmieren", "alderaande", "alderliefste", "alf", "alfedraaid", "alfgebakken", "alfien", "alfies", "alfkannetjen", "algemien", "algemiene", "aliekruuk", "allebeie", "allefien", "allefsessien", "allegaor", "allemaol", "allemeneur", "alleraande", "alleve", "allevegange", "alleverweges", "allien", "alliendeg", "alteed", "altees", "alteraosie", "altesen", "altosen", "alve", "alwier", "amaar", "ambaaien", "ameren", "amerslag", "ampars", "amparte", "amper", "amsteren", "an", "anaolen", "anbelanen", "anbouwtjen", "anbranen", "anbreken", "anddoek", "andjen", "andoen", "andoenige", "anduien", "andurven", "anekieken", "anen", "anenwreven", "anesloegen", "ange", "angel", "angelegeneid", "angen", "anger", "angeralf", "angeref", "angeren", "angers", "angersomme", "angingen", "angrepen", "angt", "anker", "ankieken", "anklauw", "anklien", "ankoemen", "anlaanden", "anlopen", "anloper", "anlopertjen", "anmarkege", "anmarkige", "anmeaken", "anniemen", "anoren", "anouwen", "anskarrelen", "anskieten", "anskreven", "anslagen", "ansleuten", "ansoop", "anspraak", "anspreekbaor", "anstalten", "ansteken", "antieren", "antreen", "antwarpen", "anvallig", "anverwaante", "anwinnig", "anzeggen", "anzegger", "anzetten", "anzien", "aodem", "aodemaolen", "aodemloos", "aoder", "aofslag", "aol", "aold", "aolde", "aolen", "aolt", "aoltjes", "aor", "aord", "aordig", "aordige", "aos", "aosem", "aost", "aostig", "aotjen", "aoze", "ap", "apenuten", "apenutepitjes", "apklaore", "appelepint", "appen", "ard", "arde", "arder", "ardop", "ardrijer", "arecht", "arekien", "arepels", "arfst", "arg", "arge", "arger", "argere", "arges", "argst", "argste", "argwoon", "aring", "aringfiets", "aringkulen", "arnstig", "arnstiger", "arrebuien", "arregewaosies", "arregewieren", "arremoede", "arrepeus", "arrepeusvat", "arrie", "arrivieren", "arte", "artekinnes", "artelijk", "artelijke", "artgroendig", "artig", "artjen", "as", "asof", "at", "atten", "aved", "avedlocht", "aven", "avend", "avenmeaster", "avenmoend", "avens", "aventjen", "avenvuur", "averzieren", "awaor", "baand", "baggelen", "bak", "bakakertjen", "bakboorskaant", "bakerpraotjes", "baklocht", "bakskipper", "bakstien", "bakzeal", "baldaodig", "balkaoter", "balleken", "ballen", "balstien", "banen", "bange", "bangesketerd", "bankofskriften", "baoi", "baolem", "baolempien", "baor", "baord", "baos", "baosien", "baotjen", "baotjesstriept", "baozen", "barg", "bargout", "bargvuurtjen", "barre", "barrebiesies", "barrel", "barrels", "barsted", "barstende", "basta", "be-ang", "beaaglijke", "beaarsen", "beabe", "beabezegger", "bealleve", "beang", "beat", "bedaord", "bedaorde", "bedde", "beddegersteed", "beddeplanken", "beddetjen", "bedeeus", "bedelaor", "bediesd", "bedinkelijk", "bedinken", "bedinkingen", "bedinksels", "bedocht", "bedoenige", "bedrijvigeid", "beduien", "beduusd", "bedörf", "bedörven", "bee", "beel", "been", "beet", "beffe", "begoon", "begrepelijk", "begrepelijke", "begriep", "begriepen", "begrip", "begript", "beie", "beien", "bekiek", "bekieken", "bekinde", "bekindste", "bekinnen", "bekkien", "bekkiesteed", "bekklaamp", "bekknecht", "bekliefd", "beklien", "beknongelen", "bekoemen", "bekold", "bekollen", "bekommerd", "belaand", "belabbekakken", "belanen", "belen", "belift", "bellegen", "bellen", "belletjen", "belopen", "bemeppen", "bemieterd", "bemuuiege", "bemuuien", "benaodielde", "benaord", "benaudigeid", "benen", "beneumen", "beniedendraam", "benien", "benijen", "benijt", "benoorden", "beoefte", "beoorlijk", "beoren", "beoud", "beouwen", "bepaold", "bepaolde", "bepraot", "bepraote", "beprussen", "beraod", "beremusse", "beretaanden", "berikken", "beroepsvaort", "beruken", "bes", "beskandelisierd", "beskandelisieren", "beskarmde", "beskarmen", "beskarmende", "beskarming", "beskeien", "beskreawen", "beskreven", "beskrieven", "beskutting", "beslag", "besleut", "besleuteloos", "beslot", "beslut", "besluten", "besluut", "bespotte", "bespruken", "bessem", "bessems", "bessien", "bessieszegger", "besstee", "bestee", "besteeduurtjes", "besteen", "bestees", "besteetjen", "besteken", "bestelwagentjen", "bestimd", "bestindig", "besting", "bestingen", "bestot", "bestörf", "besussedieren", "betakken", "betakt", "betaol", "betaold", "betaolden", "betaolen", "betaolige", "betaoling", "betaolt", "beteakenen", "beteakent", "betees", "beten", "betere", "betest", "betesten", "betijen", "betjoenen", "betoeten", "betoeterd", "betrit", "betroonde", "betrouwbaore", "betuterd", "beuge", "beugen", "beum", "beurtskipper", "beurtvaorder", "beut", "beuten", "beutenduur", "beutenkaant", "beutenmuur", "beveendelijk", "beveuld", "beveulen", "bevilt", "bevongen", "bevreuren", "bevuurbield", "bewaor", "bewaord", "bewaorde", "bewaoren", "bewaorskoel", "bewegege", "bewigt", "bewist", "bewoeg", "bewoegen", "bewonderige", "bezaard", "bezaren", "bezealen", "bezieten", "bezoekige", "bezoon", "bezupen", "bezurgd", "bezurgen", "bezwaorlijk", "bezwiek", "bezwieken", "bezwiet", "bezwik", "bezwikken", "bezwikt", "bidde", "biddede", "biebel", "biebeletheek", "bieden", "biefde", "bield", "bielden", "bieldjen", "bien", "bienen", "bientjen", "bientjes", "biesien", "biesies", "biest", "biestelijk", "biesten", "bietjen", "biever", "bieverig", "bieverige", "biezen", "biezig", "biezonger", "biezongere", "biezongers", "bijedraaid", "bijeenkanger", "bijen", "bijetrokken", "bijgelovigeid", "bijkiewiewen", "bijkoemen", "bijkost", "bijouwen", "bijspul", "bijzaak", "bijziende", "bik", "bille", "bin", "binde", "bingelen", "binkien", "binnen", "binnenaold", "binnenaolen", "binnenboksen", "binnenboorde", "binnendraam", "binnenekeumen", "binnenglien", "binnenglijen", "binnenkaant", "binnenkieken", "binnenouten", "binnenskolle", "bit", "blaauw", "blaauwe", "blaauwsel", "bladzeede", "bladzeedes", "blak", "blakte", "blank", "blaoderen", "blaodjen", "blaodjes", "blaoren", "blaos", "blaost", "blaozen", "blaozend", "blaozer", "blaozerd", "blaozers", "blede", "bleef", "blief", "bliek", "blieke", "blieken", "blieven", "blift", "blik", "blikken", "blikt", "bloedplekke", "bloedreaze", "bloen", "bloenen", "bloes", "bloet", "bloezen", "blok", "blonk", "blost", "blote", "bluui", "bluuide", "bluuilocht", "bluuiweer", "bluus", "bo", "bo-skip", "bocht", "boeg", "boegen", "boegluk", "boegsel", "boegsellatte", "boekdielen", "boekien", "boekies", "boend", "boender", "boent", "boerenlaand", "boerenskuur", "boet", "boeten", "boezel", "boezels", "boge", "bokkewagen", "boks", "boksklosse", "bol", "bolder", "bolle", "bolleboes", "bollemaande", "bollen", "bolletjen", "bolletjes", "bollinbrei", "bommenwarper", "bommezij", "bonen", "bonensoep", "bonensoepien", "bonk", "boompien", "boompies", "boon", "boorde", "boorsel", "booskip", "booskippen", "booskippentas", "booskippies", "bootaven", "bootjen", "booze", "borstrukkien", "boskop", "bot", "botbeuger", "botnetjes", "botter", "bottermarkt", "botterpunten", "bovenbroek", "bovenduur", "bovenduurtjen", "bovenlage", "bovenpieze", "braan", "braand", "braande", "braandekietel", "braanen", "braanende", "braant", "brandeween", "brandissen", "brantuten", "braodspit", "bream", "breawer", "brei", "breien", "breikoes", "breiskoel", "breketten", "breuk", "breun", "breune", "breustabletten", "breuste", "briebel", "bried", "briedeut", "briefien", "briefies", "briesien", "brievetessien", "brijdt", "brijen", "brik", "brikt", "brille", "bring", "bringen", "bringt", "brocht", "brochten", "broekege", "broekspeep", "broen", "brogge", "brokkelen", "brokken", "broon", "broont", "brukkien", "brulleft", "brutaolweg", "bruuk", "bruur", "bugel", "bugen", "bugt", "buie", "buk", "bukken", "bukt", "bukte", "buktouw", "bullemen", "bult", "bupe", "burdjen", "burg", "burgde", "burgemeaster", "burgen", "busse", "bussien", "buug", "buuie", "buuiig", "buuken", "buur", "buurtjen", "buurvrouwe", "cellofaanflusien", "cellofaantjen", "cint", "cinten", "cintimeter", "collecte", "consternaotie", "controlieren", "d'rlui", "d'rluiers", "d'rluis", "d'rs", "d'rvan", "d'rzelf", "daans", "daansen", "daanst", "daarnao", "dage", "dagelijks", "dagen", "dagien", "dak", "dakken", "dakpanne", "dakpannen", "dakrimpien", "dam", "damie", "damieverdan", "dammetjen", "dampen", "dangelen", "dankbaor", "dankdag", "daod", "daolder", "daolen", "daor", "daoran", "daorbij", "daorduur", "daorginder", "daormie", "daornao", "daornet", "daoro", "daoromme", "daorop", "daorstellen", "daorvan", "daorvor", "daorzo", "darg", "dartien", "dartig", "daved", "davedblok", "deat", "deel", "deenserig", "deggien", "dek", "dekbalk", "deken", "dekenpoten", "dekentjen", "dekes", "derekt", "desinfectieren", "deskundigen", "dessel", "dessien", "detachierd", "deug", "deugen", "deuk", "deum", "deumendik", "deun", "deunen", "deur", "Deuse", "deuster", "deustere", "deut", "deuve", "deuven", "deuvevrieneging", "dezereg", "diakes", "dibbelieren", "dichtelegd", "dichtknepen", "dichtkniep", "dichtkniepen", "dichtwark", "dief", "dieg", "diel", "dielden", "dieldertjen", "dielen", "dieltjen", "dienden", "diensien", "dienst", "dienstmaotjes", "dier", "dierbaor", "diezek", "diezeken", "diezekien", "diggels", "dik", "dikke", "dikken", "dikkerd", "dikkertjen", "dikkien", "dikkoek", "dikkoekien", "dilleberieren", "dimpte", "dinderderijtjes", "dinderen", "ding", "dingen", "dingetjes", "diniesdag", "diniesdags", "dink", "dinkbaor", "dinkelijk", "dinken", "dinkt", "dirrectoir", "disse", "docht", "dochten", "doeg", "doegen", "doek", "doekien", "doel", "doende", "dof", "doffe", "dokter", "doktersvuurskrift", "dolgat", "dollejoris", "domenei", "domeneis", "dommelde", "donderdagsochtes", "donig", "donkeren", "donkerte", "donneken", "donnekerd", "doodeus", "doodklied", "doodstille", "doodussien", "dooie", "dooiekop", "doop", "doopsiel", "doos", "dooze", "dopege", "dopien", "doppe", "dorde", "dordeman", "dorst", "dorsten", "dosien", "dove", "doven", "doze", "draam", "dracht", "drank", "draod", "drealegen", "dreef", "dreenzerig", "dreessien", "dregge", "dressoir", "dreup", "dreupen", "dreupnatte", "dreutel", "dreuve", "dreuvesukker", "dreven", "drief", "drieklis", "drieklizoor", "drieoenderd", "driepitter", "drietuut", "drieven", "drift", "dring", "dringen", "dringt", "droelie", "droezig", "droge", "drogien", "drok", "drokke", "drokken", "drokt", "drokte", "droktemaker", "drokten", "drokwaoter", "dronk", "dronked", "droogkappe", "drubbelen", "drunen", "drup", "drupen", "druppel", "druppels", "druppeltjen", "druppen", "druppien", "drupt", "drupte", "druup", "dubbel", "dubbelt", "dubbeltjen", "dubbeltjes", "duffies", "dugen", "dugt", "duien", "duisien", "duk", "duken", "dukken", "dukkers", "duks", "dukt", "dunne", "duren", "durf", "durft", "durp", "durpel", "durven", "dut", "duug", "duugd", "duuk", "duuntjen", "duur", "duurboette", "duurbuug", "duurdat", "duurde", "duurdreusen", "duurdrong", "duurebrocht", "duuregoon", "duureupening", "duurgoon", "duurgoons", "duurkoemen", "duurkrukke", "duurlopen", "duurmaakte", "duurmartelen", "duurnat", "duurtastend", "duurte", "duurtjen", "duurvertellen", "duurvriest", "duurwaakte", "duurwarken", "duurzaagde", "duurzetten", "duurzicht", "duvel", "duvelbanster", "duvels", "duvelsdoodjen", "duveltjen", "duzed", "duzelig", "duzenden", "duzesallef", "dwaolen", "dwing", "dwingen", "dwingt", "dwurs", "dwursdreven", "dwurskop", "dwursstraotjen", "eagelijk", "eagen", "eagenaordig", "eagenaordige", "eagenaoresse", "eagenrecht", "eagenskap", "eagenskeppien", "eamelijk", "eande", "eandelijk", "eandeloos", "eanden", "eandigde", "eandigen", "eaw", "eawen", "ebald", "ebbe", "ebeurd", "ebeuren", "ebieten", "eblieken", "eblieven", "ebloezen", "eboenden", "ebokt", "eboord", "eborsten", "ebouwd", "ebreid", "ebrocht", "ebruken", "ebugen", "edaverd", "edekt", "eden", "edield", "ediend", "edocht", "edoegd", "edoon", "edraaid", "edraaide", "edrieven", "edroegen", "edrokt", "edrongen", "edronken", "edroomd", "edrupen", "edugen", "eduken", "edurfd", "edwongen", "eek", "eenkanger", "eenkangers", "eersten", "ees", "eesfabriek", "eeskejen", "eeskisten", "eeskouwe", "eesskots", "eesverienege", "eesvlet", "eesvletluien", "eesvloer", "eesvlot", "eesvrijer", "eeszakken", "eet", "eezer", "effen", "effien", "effies", "eflikt", "efluten", "efnaosd", "eftig", "egeten", "egeuten", "egeven", "egieten", "egieven", "eglien", "egooid", "egoon", "egriepen", "egroeven", "egromd", "eierdeur", "eierdeurtjen", "eierduppies", "eitjen", "eitouw", "ejanest", "ekel", "ekeumen", "ekeuzen", "ekieken", "ekieperd", "ekikkerd", "ekind", "ekist", "ekke", "ekkien", "eklaagd", "ekletst", "eklimd", "ekloend", "eklommen", "eklopt", "ekniepen", "ekocht", "ekoft", "ekookt", "ekoolteerd", "ekost", "ekrabbed", "ekriebeld", "ekriegen", "ekrieten", "ekrompen", "ekruid", "ekrupen", "ekuund", "ekwakt", "ekwieten", "el", "elaard", "elacht", "elakt", "elaoten", "eld", "elder", "eldere", "elegd", "elegen", "eleugen", "eleusterd", "elfien", "elfindartigst", "elft", "elicht", "elieken", "elien", "eliezen", "ellege", "elleke", "ellekellek", "ellepen", "ellestok", "elleven", "elmoutjen", "elmstok", "eloepen", "elokt", "eloon", "elost", "elp", "elpen", "eluid", "em", "emaakt", "emaolen", "emarkt", "emeerd", "emel", "emelwaoter", "ememerd", "emept", "emieten", "emoord", "emurken", "emuugd", "emzelf", "enageld", "ene", "enesteld", "eneumd", "eneumen", "enuttigd", "eoord", "epakt", "epast", "epikt", "eploft", "epluzen", "epoest", "eppien", "epraot", "epreekt", "epruufd", "er", "eraakt", "eran", "eraolde", "erder", "erdertjes", "ereasd", "eredded", "ereged", "ereked", "ereut", "ericht", "eriegeld", "erien", "erieven", "erinneringen", "erit", "erlui", "erluiers", "ernaost", "eroepen", "eroerd", "erof", "erold", "eromme", "erookt", "eroon", "erop", "erover", "errinneringen", "ers", "eruken", "ervan", "ervaoring", "erwt", "es", "esbekkien", "eselijke", "eskarreld", "eskeld", "eskept", "eskeurd", "eskeuren", "eskeuten", "eskienen", "eskoeid", "eskonken", "eskreawd", "eskrieven", "eskrobbed", "eskrokken", "eskudded", "eskulden", "eskuven", "eslao", "eslaos", "eslapen", "esliept", "esloegen", "eslonken", "eslupen", "esluten", "esmeerd", "esnien", "esnijacht", "esnorkt", "esnuven", "espaord", "espiegen", "espiet", "esprongen", "espruken", "espruten", "essen-outen", "esskee", "estapt", "esteld", "esteulen", "estieken", "estieven", "estild", "estonken", "estoofd", "estoomd", "estoon", "estopt", "estort", "estouwd", "estraft", "estrieken", "estrien", "estrooid", "esturven", "estuurd", "estuven", "et", "etalagereut", "eteld", "etild", "etoegen", "etreen", "etrokken", "etroost", "etrouwd", "etzelf", "etzelfde", "etzij", "eu", "eulie", "eulieboer", "euliejas", "eulielaamp", "eulielaampen", "eulievelletjen", "eupen", "eupenbaor", "eupenbaore", "eupenbaorige", "eupende", "eupengoon", "eupening", "eupenspouwen", "eupenstoon", "euperaotie", "eur", "eurlie", "eurlies", "eurlui", "eurluiers", "eurluis", "eurzelf", "eus", "eusbezoek", "eusifieren", "eusinne", "eusouwen", "eusouwes", "eut", "eutaold", "eutaolden", "eutaolder", "eutballeken", "eutbarsten", "eutbringen", "eutbruuien", "eutbuiters", "eutbundig", "eutdijen", "eutdoen", "eutdrokkelijke", "eutdrokken", "eutdrokkige", "eutdrokking", "eutdroogde", "euteandelijk", "eutedelgd", "eutedield", "eutedocht", "eutegeven", "euteinde", "eutekieken", "euteklied", "euterste", "eutesluten", "eutesnien", "eutespreide", "eutestieken", "eutestörven", "euteteld", "euteuzerig", "eutevullen", "eutewarkt", "eutewikte", "eutewossen", "eutfenieren", "eutfeugelen", "eutgang", "eutgave", "eutgebreid", "eutgebreide", "eutgelaoten", "eutgerekend", "eutgiever", "eutglienen", "eutkiek", "eutkieken", "eutkoemen", "eutkoemend", "eutkomst", "eutkramen", "eutkunen", "eutkuren", "eutlao", "eutlekken", "eutniemen", "eutnodigen", "eutnodigend", "eutpraoten", "eutpölende", "eutredden", "eutredding", "eutrekenen", "eutskelden", "eutsloon", "eutsprak", "eutspreken", "eutstoon", "euttrekken", "euttulen", "euttypen", "eutval", "eutverteld", "eutvleug", "eutvoegelen", "eutvoerde", "eutvul", "eutzet", "eutzeunigen", "eutzicht", "eutzoeken", "euzen", "eveegd", "evist", "evleugen", "evoeld", "evoenden", "evoeren", "evongen", "evreuren", "evrieten", "evroegen", "evullen", "ewaaid", "ewacht", "ewaorskouwd", "ewarmd", "ewest", "ewieten", "ewiezen", "ewild", "ewind", "ewitteld", "ewoegen", "ewoend", "ewoenden", "ewonnen", "eworren", "ewossen", "ezakt", "ezegd", "ezel", "ezelen", "ezer", "ezeren", "ezers", "ezet", "ezeten", "ezien", "ezieten", "ezocht", "ezongen", "ezonken", "ezouten", "ezugen", "ezurgd", "ezwiegen", "ezwommen", "feal", "fealen", "februaori", "feen", "feentjes", "femilie", "fene", "fenient", "ferniendig", "ferwiel", "fesoen", "fesoenlijk", "feu", "fiedelen", "fienst", "fiesevaozen", "fiest", "fiestdagen", "fiestelik", "fiets", "fiezelemie", "figgelieren", "figuurtjen", "finaol", "flaauw", "flaauwekul", "flaauwte", "flappen", "flarderig", "flartjes", "flatten", "fleat", "fleer", "flemerig", "fleppien", "flesse", "flessen", "flessien", "fliebe", "fliemt", "fliestertjen", "flikken", "flikkerije", "flikkien", "flinstertjen", "flinter", "flinters", "flippen", "fluoricierende", "flurten", "flurtnagel", "flusien", "flut", "fluusterde", "fluusteren", "fluut", "fluwiel", "flöt", "flöten", "fnadderig", "fnaosde", "fnaosien", "fniezen", "foedel", "foeterde", "fokke", "fokkeskoot", "fokkeskootklaamp", "fommelen", "fonneken", "fonnekgaoren", "fonnekklössien", "forse", "fort", "fout", "friste", "fronselen", "fui", "fökkien", "gaanze", "gaauw", "gaf", "gaffelduurtjen", "gak", "galio", "gallege", "gallegen", "gammel", "gang", "gange", "gangen", "gangpad", "gank", "ganker", "gannef", "gaor", "gaoten", "gaotjen", "gapen", "garre", "garrebalder", "garren", "garrenaor", "garrewiendjen", "garst", "gat", "gatwaoter", "gavven", "geaf", "geal", "geallarmierde", "geamelijk", "gebaor", "gebaorde", "gebed", "gebefd", "gebied", "gebouwtjen", "gebreid", "gebruk", "gebruken", "gebrukken", "gebrukt", "gebukt", "gebuulk", "gedachte", "gedachtes", "gedag", "gedagzeggen", "gedichien", "gedielte", "gedieltes", "gedienstig", "gedimpt", "gedoe", "gedoonte", "gedoontes", "gedreens", "geduvel", "geeime", "geeimpien", "geelblak", "geeusvest", "gefronste", "gegieven", "gei", "gejoegen", "geklaauw", "geknaak", "gekoop", "gekruun", "gelaard", "gelaoten", "geld", "gelegeneid", "gelegeneidjen", "gelien", "geliend", "geliezene", "gelik", "geloft", "gelok", "gelokkig", "gelokt", "gelukkien", "gemaanteld", "gemaauw", "gemak", "gemaol", "gemaolen", "gemattierde", "gemeak", "gemien", "gemiente", "gemientearbeier", "gemienteveldwachte", "gemoed", "gemurregen", "genacht", "genaken", "genarmd", "genas", "genees", "generaotie", "geneugten", "geneumd", "genugen", "genut", "geoest", "gepraot", "gerak", "gerdeen", "gerdenen", "gerdintjen", "gerdintjesgeel", "gerecht", "gerei", "gerespelde", "geriegeld", "geriffemaard", "gerinnewier", "geruste", "geskeet", "geskut", "gesnork", "gesprek", "gesprekken", "gestalte", "gestommel", "geteuge", "getier", "geur", "geut", "geuten", "geval", "gevaorlijk", "gevaorlijke", "gevaorlik", "gevecht", "gevlieg", "gevloek", "gevoeles", "gewaor", "geweerseltjen", "gewieten", "gewind", "gewoen", "gewoene", "gezelskap", "gezeten", "gezicht", "gezin", "gezoend", "gezoendeid", "gezoendigeid", "gief", "gieke", "gien", "gieniene", "gieniensen", "giest", "giestelijk", "giestelijke", "giestelijker", "giesten", "gieuw", "gieuwgauw", "gieven", "gievend", "gif", "gift", "gil", "gillepen", "gimp", "ginkien", "ginkies", "ginnegappen", "girlegorgel", "gister", "gisteraved", "gisterochted", "glaaien", "glad", "gladde", "gladdigeid", "gladjanus", "gladniks", "glaosien", "glaozen", "glas", "glasinloodrimpien", "glatindal", "glien", "glienen", "glieuw", "glieuwen", "glijboontjen", "glijen", "glimlichies", "glimoogies", "glirs", "gloednijd", "glop", "gluuiend", "gluuiende", "goedeid", "goeie", "goemannen", "goenst", "goffie", "gonen", "gongelaor", "goon", "goond", "goonde", "goondeweg", "goppen", "gordenen", "gort", "gortkeat", "gortkeater", "got", "goud", "goudgrune", "gouwelikken", "gouwen", "graauw", "graauwen (op-)", "graf", "grafpaoltjen", "grafparkien", "grafstien", "grafstienen", "grafstimme", "graft", "grafte", "gramiet", "gramietig", "gramstorig", "granaten", "graozen", "graven", "greep", "grees", "greeste", "grepen", "greppien", "gres", "greze", "griep", "grij", "grins", "grinze", "grinzen", "gript", "grissen", "gristen", "groend", "groenden", "groes", "groffel", "groos", "grooste", "groot", "grosigeid", "grosliest", "groze", "grozigeid", "grundel", "grune", "grusien", "gruuide", "gruuien", "gruun", "gruunteimmer", "gruunten", "gruuntesoepien", "gruus", "gruzeleminten", "gruzels", "guldes", "guleken", "gulen", "gulende", "gunt", "gunter", "gunteren", "guzen", "görref", "ie", "iederiene", "ieken", "iel", "iele", "ielegaor", "ielemaol", "ielendal", "ielt", "ien", "ien toet mem", "iender", "iene", "ienegste", "ienen", "ienig", "ienigste", "ienmaol", "ienpitstelletje", "iens", "iensen", "iensgiestig", "ientjen", "ientonig", "ientonige", "ienvoudig", "ienzaam", "ier", "iermie", "iernaost", "iero", "ierzo", "iet", "iete", "ieten", "iette", "ieuw", "ieuwen", "ieuwig", "ieuwige", "ieuwigeid", "ih", "ij", "illegeaved", "illektriek", "illemint", "illinde", "illindig", "illindigeid", "imd", "imden", "immer", "immers", "immertjen", "inderdaod", "indinken", "indjen", "indjes", "indrokken", "indrokt", "indrokwekkende", "inebield", "ineenkanger", "ineloepen", "inepurst", "ineskeuten", "ineskrieven", "inestieken", "inevullen", "infermierde", "infermieren", "ing", "ingel", "ingen", "inienen", "iniens", "iniensen", "ink", "inkel", "inkeldekoren", "inkele", "inkelt", "inkert", "inkoemen", "inksel", "inkwam", "inliep", "inlopen", "inne", "inneboom", "innerlijk", "inniemen", "inoud", "inoudsopgave", "inouwen", "inpeperen", "inskeut", "inskikkelijkeid", "inspectierd", "inspectieren", "intins", "intugendiel", "inval", "invleug", "invleugen", "invliegen", "invul", "inwaaien", "inwindig", "inzealen", "ippeldepippelde", "irkinde", "istorisch", "it", "itte", "jaampen", "jachien", "jacht", "jachtaven", "jakken", "jammeren", "janesen", "jankende", "januaori", "jaor", "jaoren", "jaorig", "jaortjen", "jaortjes", "jas", "jazieker", "jekker", "jekkertjen", "jeloers", "jeluiers", "jesper", "jessien", "jessies", "jie", "jijling", "jodenoek", "joe", "joeg", "joen", "jonge", "jonger", "jonges", "jongetjen", "jongetjes", "jonk", "jonkvolk", "juffertjen", "julie", "julies", "jului", "juugd", "juugdig", "juust", "juwieltjen", "jörkien", "jörrekien", "kaans", "kaansel", "kaant", "kaantelen", "kaanten", "kaantkoek", "kaantplank", "kaarnpen", "kaarsien", "kaarslicht", "kaassies", "kaauw", "kaauwen", "kachel", "kacheltjen", "kadoddertjen", "kaffetoris", "kakkemeie", "kakkemeiestoelen", "kakvat", "kalkendotte", "kalversanen", "kamer", "kamerduur", "kamerduurtjen", "kamertjen", "kamertjes", "kamiel", "kamleen", "kanaoriepiet", "kanger", "kanne", "kannetjen", "kaolig", "kaorege", "kaoregen", "kaorten", "kaoter", "kaoterjacht", "kaoters", "kaotertjen", "kapien", "kapkool", "kappen", "kappetoris", "kapstok", "karbenaadjen", "karekrolletjes", "karel", "karels", "kark", "karkbank", "karkduur", "karkelijke", "karkeraod", "karkerolletjes", "karkganger", "karkgeld", "karkien", "karkof", "karkpertaol", "karkreaze", "karkstraot", "karkteed", "karktillefoon", "karmend", "karmes", "karmesbeddetjen", "karre", "karrekaot", "karrepoes", "karretjen", "kars", "karsbomen", "karsboom", "karsdag", "karsdagen", "karsgedachtes", "karsgedichien", "karsmeid", "karsnommer", "karsveraol", "karsverlichting", "karsverlof", "karsvrijer", "karsvörsien", "karsvörsies", "karweitjen", "kasien", "kasies", "kast", "katekse", "kateul", "katte", "katte-ogen", "kattespege", "kavalje", "keasien", "keat", "keaze", "keazerespel", "kedootjes", "keel", "keelbaand", "keend", "keens", "keer", "keersemakersgat", "keertjen", "kelder", "kelderduur", "keldertjen", "keldertrappe", "kelte", "keltjen", "kenon", "kepot", "kerel", "kereltjen", "kesse", "kessien", "ketel", "keue", "keukediefien", "keven", "kezeen", "kezenen", "kiek", "kieken", "kiekt", "kielemorten", "kiengerachtig", "kiengeren", "kiengergezichie", "kiengertjes", "kiepkarre", "kiepkarretjen", "kier", "kiertjen", "kieskaauwen", "kiet", "kietelden", "kieze", "kiezelstienen", "kift", "kiftig", "kimmegange", "kimmen", "kinde", "kinne", "kinnen", "kinnende", "kinnes", "kinnesmaakten", "kinnis", "kinnismaken", "kint", "kintjen", "kip", "kissien", "kist", "klaamp", "klaant", "klaanten", "klaauwde", "klaauwden", "klaauwen", "klaauwend", "klacht", "klammei", "klammeien", "klaor", "klaorde", "klaoren", "klap", "klappe", "klappeie", "klapperen", "klappertanende", "klapskiet", "klapskoel", "klapstoeltjes", "klapte", "klasse", "klean", "kleanakke", "kleane", "kleanere", "kleangeld", "kleankiengeren", "kleanste", "kleppien", "kleufout", "kleut", "kleuvekeval", "kleuze", "kliederdracht", "kliedije", "kliedjen", "klieren", "klierestok", "klierestokken", "klieven", "klieverig", "klikkien", "klim", "klimpien", "klingelde", "klink", "klinken", "klintjen", "klintjes", "klippen", "kloen", "kloenen", "kloenpot", "kloete", "klokke", "klom", "klommen", "klomp", "klompen", "klonk", "klonken", "klontjen", "klosse", "klossen", "klumpies", "klus", "klussien", "klussies", "knaken", "knappies", "knechsen", "knecht", "knechts", "kneep", "kneeptange", "knepen", "knepien", "kneppies", "knie", "kniep", "kniepen", "knierpten", "knies", "knietjes", "knieze", "kniezen", "knijpt", "knikken", "knikkertjen", "knikt", "knikte", "knip", "knipoge", "knippien", "knipt", "knipte", "knoffelde", "knokkels", "knol", "knook", "knoop", "knopen", "knoppe", "knoroon", "knul", "knus", "knusse", "knuut", "koe", "koebiesten", "koegelse", "koejakkien", "koekeloeren", "koem", "koemen", "koemende", "koenen", "koente", "koernen", "koers", "koersouen", "koes", "koesebienen", "koesen", "koest", "koevleas", "koffer", "koffertjen", "koffiemullem", "koft", "kok", "kokken", "kol", "kolder", "kolen", "kolenskoppe", "kolle", "kollefamilie", "kollefamilies", "kollektezekkies", "kollen", "kolletjen", "kolleveraolen", "kollezeutjen", "kom", "komfart", "kommandierde", "komme", "kommen", "kommetjen", "kommetjes", "komoffel", "koninginne", "konkelefoesd", "konnen", "konsistorieduur", "kooi", "kool", "koolmoes", "koop", "koor", "koortjen", "kop", "kopt", "korf", "korre", "korreboel", "korregaoren", "korretjen", "kors", "kost", "kostelijk", "kostelijke", "kosten", "kostgrei", "kot", "kraag", "kraak", "kraakt", "kraakte", "kraam", "kraambördjen", "kraamofdielege", "kraamp", "kraampien", "kraampte", "kraamstoel", "kraans", "kraant", "krabbe", "krabbede", "krabbelen", "krabben", "krabbend", "krabbet", "krakien", "krakkemikkig", "kramen", "kransien", "kransies", "kraol", "kraolesketer", "kraplappe", "krappe", "kredietoogtes", "kreeg", "kreet", "kregen", "krek", "kreket", "kreketjes", "kreketten", "krekettjes", "kreten", "kretend", "kreun", "kreunen", "kreup", "kreupen", "kreusertjen", "kreuzebullem", "kriebels", "krieg", "kriegen", "krieletjen", "kriet", "krigt", "krimp", "krimpen", "krimpt", "kring", "kringelen", "kringeltjes", "kringetjen", "krintebol", "krintekakker", "krispendieren", "krit", "kromme", "kromp", "krompen", "kronewaken", "kroonleen", "kroost", "kropout", "krosien", "krozen", "kruid", "kruien", "kruil", "kruiwagen", "kruk", "krukken", "krul", "krulen", "kruletjen", "kruluul", "krumel", "krunen", "kruntjes", "krupen", "krupt", "krutjen", "kruunde", "kruup", "ku'je", "kuierde", "kuierden", "kuieren", "kukebessien", "kuken", "kukenduur", "kukenduurtjen", "kukenlaotjen", "kukenplank", "kukenrimpien", "kukenstoel", "kukentafel", "kuketjen", "kulen", "kuletjen", "kunen", "kunnen", "kunsien", "kuper", "kuperen", "kuperpoes", "kursien", "kussem", "kussems", "kusses", "kuul", "kuun", "kuus", "kuust", "kuvelden", "kuvelen", "kwakkelwienters", "kwam", "kwammen", "kwansuis", "kwaod", "kwaoie", "kwaol", "kwaolijk", "kwartjen", "kweet", "kweeuwk", "kwenen", "kweten", "kwiet", "kwinken", "kwiskwas", "kwit", "köppien", "köppies", "köppieskast", "köppiesteed", "laamp", "laampeblok", "laampen", "laand", "laande", "laanderskark", "laandrotte", "laandvasten", "laar", "laargierig", "laarplichtwet", "laarzaam", "laarzen", "labbekak", "labbekakken", "lach", "lachbuie", "lage", "laggen", "lagien", "lakens", "lakes", "lam", "lammen", "lammenaodig", "lammetieren", "lange", "langer", "langers", "langerst", "langste", "langzaam", "langzamer", "lank", "lantarenpaol", "lao", "laoding", "laorebos", "laot", "laote", "laoten", "laoter", "lappe", "lappen", "laraor", "lare", "laren", "lariekoek", "last", "lasten", "laten", "latte", "laveloos", "lazzen", "leage", "leager", "leagere", "leagst", "leagte", "leagwaoter", "lechien", "ledder", "leddertjen", "lederiene", "ledikaant", "leef", "leefde", "leefden", "leefriegel", "leefteed", "leegde", "leegte", "leen", "leeneulie", "leesbaor", "leest", "legde", "legden", "lei", "leidde", "leite", "lek", "lellek", "lelleke", "lellekerd", "lellekerds", "lemeur", "lenen", "lepel", "lepeltjen", "leppien", "leppiesmarkt", "lesse", "lessien", "lest", "leste", "lesten", "lestet", "letjen", "letjes", "letter", "letterlijk", "letters", "leug", "leugen", "leugenbank", "leugennaod", "leuk", "leur", "leus", "leuster", "leusterde", "leusterden", "leusteren", "leustert", "leut", "leuzark", "leuzebos", "levendig", "levendige", "levensdagen", "levensecht", "lever", "lichem", "lichien", "lichies", "licht", "lichtkoegel", "lichtstarretjen", "lichtstriepies", "lichtte", "liddekaant", "lied", "liedjen", "liegbul", "liek", "lieken", "liem", "lien", "lienen", "lient", "liep", "liepen", "liereboom", "lies", "liest", "liester", "lieuw", "liezen", "liffien", "lift", "lij", "lijen", "lijkaant", "lijlaand", "lik", "likken", "likt", "limenade", "lindebindjen", "linden", "lindenen", "lingte", "linken", "linker", "linkernarm", "links", "lins", "lint", "lippe", "lippen", "list", "lobberen", "locht", "lochten", "lochtmacht", "lodderein", "loden", "loegen", "loeken", "loelle", "loensde", "loerden", "loering", "lof", "logeminten", "loggat", "logieren", "logierpartij", "logierpartijen", "lokaol", "loketjen", "lokt", "lokte", "lolletjen", "longe", "lonige", "lonigen", "loningen", "loodzwaore", "looien", "loon", "loontjen", "loop", "loopekke", "loos", "lopt", "lot", "loterije", "lotten", "love", "lubben", "lucifars", "lufs", "lufter", "lui", "luide", "luien", "lumpien", "lunen", "lunend", "luning", "luteraol", "luunstoel", "lörken", "lörker", "lörkte", "lörkten", "m'n", "maaierskost", "maande", "maantel", "mage", "makt", "malle", "malleur", "maltenteg", "mangelepars", "mankierige", "manluien", "mannetjen", "mannetjes", "maolde", "maolems", "maolende", "maoltjen", "maos", "maot", "maotig", "maotigies", "maotjen", "maotjes", "maotriegelen", "maotskap", "mar", "marinepekkien", "marken", "mast", "mastbank", "masten", "mastwark", "mat", "matten", "mauwde", "mauwen", "mauwende", "mauwzak", "meaken", "meakt", "meakte", "mechienekamer", "meeloofd", "meen", "meet", "meid", "mekierige", "mekkerig", "meleksie", "melen", "meleur", "melkimmertjen", "melkkeat", "meloet", "memeren", "menaar", "menaozie", "menier", "meppelmaande", "meren", "merode", "mes", "meter", "metjen", "metor", "metorretjen", "metten", "michies", "michtig", "middeceen", "middecenen", "middecenerig", "middel", "middelbaore", "middelde", "middelduur", "middelgroot", "middelkast", "middelste", "midden", "middenskip", "mie", "miede", "miedewarking", "miedoen", "mieemaakt", "mieeneumen", "mieevullen", "miegoon", "miekoemen", "miemaken", "miende", "miene", "mienes", "mieniemen", "mient", "miepikken", "miepraoten", "miesliepen", "miest", "miestal", "mieste", "miesten", "miet", "mieuw", "mieuwen", "miewaorig", "miezerig", "miezerige", "mikken", "mikte", "mimme", "mimmes", "min", "mindjes", "mingele", "mingt", "minne", "minneling", "minnesterie", "mins", "minsekinnis", "minsen", "minsenkiengeren", "minsien", "misbaor", "miseloepen", "miskien", "misse", "mistoorn", "mit", "miteenkanger", "mitien", "moeder", "moend", "moendarmonika", "moendeling", "moenden", "moer", "moerstaol", "moet", "moeten", "moffelde", "mog", "mogge", "moggen", "moggetjes", "mokke", "mokkel", "mokte", "momint", "moneskeen", "mooien", "moon", "moond", "moondag", "moondagenaved", "moondagochted", "moondagsochtes", "moonden", "moondenlank", "moontjen", "moorden", "mos", "moske", "mosken", "mosterdpleaster", "motregentjen", "motskepper", "motten", "mouwen", "mozzen", "mugelijk", "mugen", "muiteren", "muken", "mulijk", "mumelmoendjen", "munnik", "munster", "munsteren", "munter", "mupel", "murgen", "murk", "musse", "mussien", "mussies", "muug", "muuilijk", "muuilijkeden", "muuilijker", "muuite", "muuizaam", "muur", "muut", "muutjen", "möllem", "möllepien", "möollepies", "mörgen", "mörgenmiddag", "mörges, 's", "mörregen", "naam", "naamtrekkig", "naan", "naant", "naatjen", "nachies", "nacht", "nachte", "nachtemel", "nachts, 's", "nakend", "nammen", "nanen", "nao", "naobringen", "naodat", "naoder", "naoderde", "naoderen", "naoderende", "naodinken", "naodinkend", "naodocht", "naodoen", "naogoon", "naokieken", "naolaoten", "naomiddag", "naonacht", "naor", "naore", "naorgiestige", "naost", "naovertellen", "naovragen", "naowieen", "naozaot", "narges", "narm", "narmen", "narpies", "narreges", "narrig", "nat", "natievlagge", "natjen", "natte", "nattigeid", "neeredaold", "neerezet", "nefien", "negosie", "nekke", "nekvel", "nest", "net", "netjen", "netlukkien", "netuurlijk", "neum", "neumden", "neumen", "neusien", "neust", "neuver", "neuvere", "neuze", "neve", "nichte", "niederigeid", "niegen", "niegentienniegenti", "niem", "niemen", "nietan", "nietiensen", "nietjen", "nietnekke", "nijbouw", "nijd", "nijdig", "nije", "nijjaor", "nijjaorsdag", "nijjaorsgeld", "nijs", "nijsgierig", "nijt", "nijtjen", "nikkelen", "nimt", "nippies", "nirs", "nochtere", "nodig", "nogmaols", "none", "nones", "nood", "nooiten", "noone", "noordkraak", "noordwesterstörm", "nor", "novimber", "nuken", "numt", "nune", "nuzelde", "obbelde", "ochted", "ochtend", "ochtes, 's", "oe", "oede", "oedjen", "oef", "oefde", "oefden", "oejoe", "oek", "oeke", "oekien", "oen", "oend", "oenderd", "oenderden", "oendjes", "oens", "oenze", "oepetrekker", "oesttabletjes", "oevaar", "oeven", "oevuul", "oevuuleid", "oew", "oewel", "oezelf", "ofankelijk", "ofbetaoling", "ofedrieven", "ofegroeven", "ofeloepen", "ofeneumen", "oferookte", "ofeskeuten", "ofeskuurd", "ofesnien", "ofespruken", "ofetelde", "ofewarkt", "offer", "officier", "ofgeloepen", "ofgeskeuten", "ofgezongerd", "ofien", "ofkeurend", "ofkieken", "ofkomst", "ofkomstig", "oflezen", "ofliepen", "ofloopen", "oflopen", "ofmeert", "ofmetingen", "ofouwen", "ofreazen", "ofskeid", "ofskieten", "ofskoon", "ofskruierde", "ofslag", "ofsleutdik", "ofstand", "oftig", "ofvullen", "ofwachten", "ofwachtend", "ofwassen", "ofwegen", "ofwerende", "ofwikking", "oge", "ogenblik", "oger", "ogere", "ogien", "ogies", "ok", "olle", "ome", "omgieving", "omleages", "omme", "ommedraaide", "ommedraaien", "ommegesloegen", "ommekeert", "ommekieperd", "ommelaandse", "ommelopen", "ommelt", "ommers", "ommesloegen", "omslag", "omslagontwarp", "omstrieken", "onaarbiedig", "onaordig", "onartelijk", "onbedaorlijk", "onbedaorlijke", "onbegrepelijk", "onbekwaam", "onbeleefd", "onbetamelijk", "onbetamelijkeid", "onbeullepen", "onbewoegen", "ondankbaor", "ondier", "oneetbaore", "oneil", "oneilen", "oneutgespruken", "ong", "ongebrukte", "ongedierte", "ongedocht", "ongeduld", "ongeduldig", "ongekind", "ongelok", "ongelokken", "ongeloksdag", "ongeluk", "ongemak", "ongemurken", "ongen", "ongeneumd", "onger", "ongeran", "ongerangelingen", "ongerangeren", "ongerbroeken", "ongerbruken", "ongerduur", "ongerduurtjen", "ongereande", "ongerebrocht", "ongergang", "ongergat", "ongergerdintjes", "ongergeteakende", "ongerig", "ongerige", "ongerkoemen", "ongerkraplappe", "ongerlesten", "ongerlestet", "ongermusse", "ongerpieze", "ongerskeien", "ongertussen", "ongerusteid", "ongerwarp", "ongerweg", "ongerwelen", "ongerzieer", "ongerzoekend", "onkinnis", "onmugelijk", "onofskeidelijk", "onogelijk", "ontbrikt", "ontevreen", "ontevrene", "ontouwen", "ontstoon", "ontucht", "ontuum", "ontvongen", "ontwaorde", "ontwarp", "onverskillig", "onwarkelijker", "onwees", "onwinnig", "onzieker", "oofd", "oofden", "oofdmeaster", "oofdskuddend", "oofdskuddende", "oog", "ooge", "ooggeteugen", "oogmoedig", "oogoeken", "oogpunt", "oogte", "oogtije", "oop", "oopt", "oopte", "oor", "oord", "oorden", "oordiel", "oorlog", "oorn", "oort", "ooskot", "oostaven", "oosten", "oostenwiend", "ootjen", "ootjes", "opaol", "opaold", "opaolen", "opbenen", "opbouw", "opdraaierije", "opdracht", "opebaord", "opebruken", "opedocht", "opedoon", "opedrokt", "opefoedelde", "opegeten", "opeieven", "opeklaauwd", "opeklaord", "opeklommen", "opeknapt", "opelaoten", "opelicht", "opelocht", "opeloepen", "opeloos", "opelost", "opemaakt", "openeumen", "opepakt", "opepikt", "opereumd", "operolde", "operookt", "opeskeuten", "opeskrieven", "opeskrikt", "opeskrokken", "opeslokt", "opesluten", "opesnuven", "opesponnen", "opestapeld", "opestieken", "opestoon", "opeten", "opeteugd", "opetild", "opetrommelt", "opevist", "opevrieten", "opewacht", "opewielkt", "opewoenden", "opezet", "opgaon", "opgeskeuten", "opiens", "opiensen", "opkieken", "opknapbeurt", "opknapt", "oplanger", "opliep", "oplochting", "oplopen", "opmarking", "opmarkingen", "opniemen", "opnijd", "opnijt", "opnuker", "opongen", "oppassen", "oppassend", "opperdam", "opperdan", "oppervlak", "oprammelen", "opreumen", "opskieten", "opskreven", "opslagplaose", "opstand", "opsteven", "opstommelden", "opstropen", "optater", "opteugen", "optocht", "opvaorenden", "opvleug", "opvliegers", "opvolgde", "opvolger", "opvurven", "opwaardiering", "opzede", "opzetten", "opzichten", "opzichter", "opzoeken", "orde", "ordintelijke", "oren", "orende", "orizon", "orn", "orriebel", "orten", "ospitaol", "otel", "otelletjen", "ou", "oud", "oude", "ouderling", "ouderlingen", "ouderlingenbank", "ouderlingszuun", "ouding", "oudste", "oue", "out", "outen", "outmot", "ouw", "ouwe", "ouweel", "ouwejaorsdag", "ouwen", "ouwerwesse", "ouwestraot", "over", "overallpeep", "overangen", "overblief", "overbottig", "overbringen", "overbuurman", "overbuurvrouw", "overdinken", "overdoen", "overeande", "overende", "overene", "overeplaost", "overeut", "overiges", "overje", "overkaant", "overkeumen", "overkoemen", "overkoemt", "overkwam", "overleg", "overleven", "overlevering", "overloop", "overloopsbalk", "overluide", "overmurregen", "overongen", "overoop", "overouwen", "overskot", "oversteken", "overstuur", "overt", "overteugd", "overteugen", "overvul", "overwienteren", "ozen", "ozes", "paard", "paardeogen", "paardeworst", "paardjesdag", "pabbe", "pabbezukker", "pad", "paddestoel", "pafte", "pak", "pakken", "pakkies", "pakpapier", "pakt", "pakte", "pakten", "palm", "palot", "pamperassen", "pampiertjen", "pandakker", "panne", "pannen", "pannet", "pannetjen", "pannetjes", "paodjen", "paol", "paolen", "paor", "paotjen", "papier", "papieren", "papiergeld", "papiertjen", "pappegaoi", "papperassen", "park", "part", "parten", "pas", "passe", "passen", "past", "paste", "peat-aoltjes", "peaten", "peater", "peatertjen", "peende", "peenzend", "peep", "peertjen", "peertjes", "peet", "pekkien", "pekkienk", "pekkies", "pelde", "pellen", "pepereus", "pepier", "per", "perplex", "persoonlijk", "persoonlijkeid", "perugeulie", "pesterige", "pet", "petereulie", "petereulielaamp", "petereulielichien", "petjen", "petroelje", "peugeot", "piekakien", "pieke", "pienster", "pienstergeld", "pienstermaol", "pienstermoondag", "piep", "piepen", "piept", "piet", "pieter", "pietertjen", "pietink", "pikken", "pikskrapen", "pilaor", "pilletjes", "piloten", "pilowse", "pinne", "pinning", "pippien", "pis", "pisang", "pissen", "pist", "plaaggiesten", "plagend", "plagerig", "plakke", "plakken", "plan", "plank", "planken", "plannen", "plannetjen", "plannetjes", "plaose", "plaoselijke", "plaot", "plat", "platform", "pleintjen", "pleintjes", "plekke", "plekken", "plekkien", "pleus", "pleuzen", "plichtsgetrouwe", "plinkien", "plinty", "ploeg", "ploffen", "plunjezakken", "plunjezekkien", "plus", "plust", "pluus", "pluzen", "podlootjen", "poeiers", "poend", "poes", "poesen", "poesterd", "pof", "poften", "pokkoek", "polder", "poldergroend", "pollemetaotie", "polletiek", "pols", "polsen", "pompaak", "pond", "pontiac", "poolreazigers", "poorten", "poppe", "poppeleppies", "poppetjen", "poppetjes", "porselenen", "port", "portaal", "portaol", "posien", "positie", "positieve", "positieven", "posten", "postkantoor", "pot", "potdicht", "poten", "poter", "potkacheltjen", "potloodjen", "pottebank", "pottegat", "potten", "praauw", "prachtig", "prachtige", "prakkezierd", "prakkezierden", "prakkezieren", "praot", "praoten", "praotende", "praotjen", "praotjes", "praotte", "praotten", "prebier", "prebierd", "prebierde", "prebierden", "prebiert", "preek", "presentierde", "preum", "prevelde", "prezen", "priemde", "priemen", "prik", "prikkien", "prikte", "prins", "prissien", "produktskappen", "prooi", "prot", "protesten", "prumpien", "pruttelen", "pruuf", "pruufde", "pruufden", "pruuft", "pruven", "psalm", "psalmboek", "psalmvursien", "publiekelijk", "puddekien", "puf", "puffen", "puffende", "pufkejen", "pulletjen", "punt", "punter", "puntjen", "pupeltjen", "pupperdemunt", "purt", "pusse", "put", "putaker", "putjen", "puut", "pyamajessien", "raand", "raandgarde", "rachelde", "rachelen", "rak", "raken", "rakt", "rambam", "ramen", "rammelde", "rammelen", "rang", "rank", "raod", "raodsel", "raor", "raore", "raosde", "raosel", "raoseltjen", "raozen", "raozende", "rap", "rapalje", "rare", "rauw", "ravage", "reagierde", "reasde", "reasien", "reaze", "reazen", "reazigers", "rechtvaordig", "rechtvaordige", "redderde", "reden", "redenieren", "reef", "rees", "reest", "regen", "regenboge", "regende", "regenen", "regentjen", "regenwaoter", "regeringseuzen", "reget", "reizen", "rek", "rekegen", "reken", "rekenen", "rekening", "rekte", "relaos", "reling", "rem", "remde", "reminten", "remmen", "renner", "rep", "repe", "ressien", "resultaot", "reuf", "reuk", "reum", "reumden", "reume", "reumen", "reumte", "reut", "reuten", "reven", "rezen", "richting", "rief", "rieg", "riegel", "riegelen", "riegelmaotige", "riekelt", "riemen", "riemetjes", "rien", "rienen", "riep", "riepen", "ries", "riet", "rieten", "rietjen", "rietsnijers", "rieven", "rift", "rij", "rijbewijs", "rijen", "rijt", "rijtjen", "rik", "rikke", "rikker", "riks", "riksdaolder", "riksdaolders", "rilderig", "rilling", "rimpel", "rimpien", "rimpies", "rindjen", "ringetjes", "rinkelde", "rinteloos", "rintjen", "rintjes", "rinze", "ripperieren", "rist", "ritjen", "ritme", "ritselen", "rivier", "roe", "roem", "roend", "roende", "roendjen", "roendjes", "roendte", "roep", "roepe", "roepen", "roepende", "roept", "roer", "roerde", "roerden", "roeren", "roerend", "roerklaamp", "roerstel", "roert", "roffelde", "roffelden", "rogge", "roggetjen", "rok", "roken", "rokerige", "rokken", "rokt", "rokte", "rokwiend", "rolde", "rolden", "rolle", "rollen", "rolletjen", "rolletjes", "rommel", "rommelde", "rondereindosien", "rondliep", "rooie", "rook", "rookvleas", "rookwalm", "rookwolk", "roon", "roosies", "roossien", "rooster", "rotpootjen", "rots", "rotte", "rottegat", "rotten", "rotterdam", "rottige", "rouwgerdenen", "ruk", "ruken", "rukken", "rukkien", "rukt", "rumoer", "rutelde", "rutjen", "rutjes", "ruuk", "sam-sam", "samed", "samen", "samenwarking", "saridonnen", "saries", "sarries", "savuutjen", "schaap", "schamen", "seemen", "segaar", "segaren", "sein", "sekuriteit", "sfeertjen", "sferen", "sjek", "sjekdose", "sjekdosien", "sjekkien", "sjoef", "sjoefden", "sjoeven", "sjouwden", "skaam", "skaamde", "skaamrood", "skaande", "skaap", "skaapachtig", "skaoduw", "skaoltjen", "skaosen", "skaoterde", "skapeleer", "skapen", "skapies", "skaren", "skarp", "skarpe", "skarpskutter", "skarrekeat", "skarrelaor", "skarrelde", "skarrelen", "skarrestartjes", "skarretjen", "skarretjes", "skarven", "skatrik", "skeaf", "skeen", "skeensel", "skeenwarper", "skeenwarpers", "skeer", "skeerdoze", "skeerout", "skeert", "skegge", "skeidsrechters", "skel", "skeldend", "skellen", "skellevissien", "skelt", "skelte", "skema", "skenen", "skep", "skepte", "skeren", "skeuf", "skeulen", "skeulkelder", "skeulkelderduur", "skeumrubber", "skeun", "skeur", "skeurde", "skeuren", "skeurend", "skeurtjen", "skeut", "skeut (scheut)", "skeut (schip)", "skeuten", "skeutjen", "skeuve", "skeuven", "skeuvend", "skeveningen", "skiel", "skielen", "skielijk", "skielik", "skiemer", "skiemeravedjen", "skiemerdonker", "skiemeren", "skiemerig", "skiemerige", "skiemerlimpien", "skiemert", "skien", "skienen", "skiepen", "skiepien", "skiepvaortlijn", "skiet", "skieten", "skietterrein", "skilder", "skilderen", "skilderije", "skink", "skinken", "skinkt", "skint", "skip", "skipbreuk", "skipper", "skipperspet", "skit", "skitterend", "skoe", "skoel", "skoeljuugd", "skoelmeaster", "skoelteed", "skoemaker", "skoenedosien", "skoenen", "skoer", "skoeren", "skoers", "skoertjen", "skok", "skokkelaand", "skokker", "skokte", "skolletjes", "skommelde", "skommeldrok", "skommelende", "skone", "skonk", "skonken", "skoon", "skoondochters", "skoonmaken", "skoonmoer", "skoonmoers", "skoonvaor", "skoorstienen", "skoorstienmaant", "skoot", "skop", "skoppen", "skopt", "skopte", "skorre", "skort", "skot", "skotebaand", "skots", "skotsewuppertjen", "skotteltjen", "skotteltjes", "skraanzen", "skraapsels", "skraapte", "skraole", "skreauw", "skreaw", "skreawde", "skreawden", "skreawen", "skreawt", "skreef", "skreefster", "skreefweze", "skreven", "skrevers", "skreverstelinten", "skriebelbientje", "skrief", "skrieven", "skrift", "skriftelijk", "skriftelijke", "skrik", "skrikt", "skril", "skrille", "skrobbe", "skrobben", "skrobbet", "skroeve", "skrok", "skrubel", "skuddede", "skudden", "skuddende", "skuddet", "skufelde", "skufelden", "skufelen", "skuffies", "skuft", "skuifies", "skukelen", "skul", "skuld", "skulden", "skuren", "skurken", "skutjen", "skuuf", "skuufelde", "skuur", "skuurt", "skuurtjen", "skuven", "sla", "slaap", "slaapkamer", "slaapplaosen", "slaappoppe", "slachtoffer", "slag", "slagen", "slager", "slagt", "slao", "slapen", "slaperige", "slapien", "slapt", "slecht", "slechte", "slechter", "slechtst", "slee", "sleje", "slempout", "sleup", "sleupen", "sleupmoordenaor", "sleus", "sleusduren", "sleut", "sleuten", "sleutgange", "slie", "slieboot", "sliep", "sliepen", "sliept", "slieptouw", "slietjen", "slikoogte", "slikte", "slimmer", "slingerde", "slink", "slinken", "slinkt", "slinterden", "slobberde", "slobberen", "slobbert", "sloeg", "sloegen", "sloep", "sloffen", "slofte", "slok", "slokte", "slonk", "slonken", "sloon", "slop", "slot", "slukkien", "slupen", "slupt", "slurpen", "slurpte", "slut", "sluten", "sluup", "sluut", "smaak", "smaakte", "smaakten", "smak", "smakelijk", "smaken", "smakt", "smakte", "smalle", "smallere", "smekend", "smeren", "smerig", "smerige", "smoondagsmiddags", "smulten", "smuuige", "snaor", "snap", "snars", "snazze", "snert", "sneuf", "sneuven", "sneuvende", "snien", "snij", "snijacht", "snijachtpoppen", "snijen", "snijjacht", "snijjachten", "snijsturm", "snijt", "snirt", "snirterwten", "snirtjen", "snoek", "snoepgoed", "snokte", "snoraoren", "snorde", "snorken", "snorre", "snorrende", "snotdoek", "snuft", "snuuf", "snuut", "snuvelde", "snuven", "soedek", "soep", "soesde", "sokke", "sokken", "sol", "soldaoten", "sollicitierd", "sommige", "sommigen", "soms", "spande", "spanden", "spannend", "spanning", "spao", "spaorde", "spaorpot", "spaort", "sparren", "spartelde", "speatte", "speeg", "speet", "spegen", "spek", "spek-oogte", "spekkien", "spekkoper", "spekvet", "spelling", "sperde", "speurde", "spieg", "spiegel", "spiegeltjen", "spiegen", "spieren", "spiertjes", "spigt", "spijlen", "spijs", "spille", "spinnen", "spinnetjes", "spitste", "spliet", "splietjes", "split", "split-", "spliturwten", "spoek", "spoeken", "spoeksels", "spoekt", "spoekte", "spoekten", "spoekveraol", "spoekveraolen", "spoel", "spoelen", "spoeltjen", "spoetnik", "spoken", "spokken", "spoonse", "spoor", "sporen", "sport", "sporten", "spot-ogen", "spotboef", "spotte", "spotten", "spottend", "spraauw", "spraauwestroend", "sprak", "sprake", "sprakeloos", "sprakken", "spreek", "spreekt", "spreken", "spreut", "spreuten", "sprikt", "spring", "springen", "springt", "sprong", "sprongen", "sprut", "spruten", "spruut", "spuit", "spuiten", "spuitjen", "spukkies", "spul", "spulen", "spullen", "spulletjen", "spulletjes", "spuulde", "spuulden", "spuulgoed", "spuulse", "staampende", "staampt", "staan", "staat", "stad", "stage", "stagoge", "stagtaolie", "stak", "stakken", "stalde", "stand", "standaard", "stange", "stao", "staolen", "staon", "staorde", "staoren", "staot", "staotig", "stap", "stapeldol", "stappen", "stapte", "stapten", "star", "stark", "starke", "starre", "starren-emel", "start", "startjes", "stat", "states", "station", "staverse", "steager", "stealege", "steat", "steden", "steeds", "steef", "steefsel", "steefselkissien", "steek", "steel", "steeldief", "steetjen", "stehen", "steiger", "steile", "steken", "stekien", "stel", "stelde", "stelden", "stelen", "stellen", "stelletjen", "stem", "sterk", "steuf", "steul", "steulen", "steupen", "steuven", "steuver", "steuvers", "steuvertjen", "steve", "stevede", "steven", "stevende", "stevenplaot", "stevent", "steward", "stichten", "stief", "stiefelde", "stiefelen", "stiekem", "stiekum", "stien", "stienen", "stienkool", "stievege", "stieveger", "stieven", "stift", "stikt", "stille", "stillen", "stiller", "stilletjes", "stillezitten", "stilstand", "stilt", "stilte", "stim", "stimde", "stimgeluid", "stimme", "stimmen", "stimmetjen", "stimmige", "stimming", "stimt", "sting", "stinge", "stingen", "stink", "stinken", "stinkt", "stoel", "stoelen", "stoeltjen", "stoep", "stoet", "stoffer", "stoffers", "stofregentjen", "stofregetjen", "stok", "stoken", "stokgoed", "stokked", "stokken", "stokte", "stolde", "stom", "stomen", "stomp", "stonen", "stonk", "stonken", "stook", "stoomskip", "stoomtrolder", "stoon", "stoonde", "stoonplekkies", "stoot", "stootte", "stoppe", "stoppen", "stopt", "stopte", "stopvurreve", "stopvurve", "storing", "storm", "storte", "stortemelk", "stortte", "stot", "stoten", "stotterde", "straande", "straandjutter", "straandvoender", "straant", "straffe", "straffen", "strak", "strakke", "stram", "strammer", "strantjen", "straolde", "straolen", "straolend", "straolende", "straoltjes", "straot", "straoten", "straotjen", "straotverlichting", "strekte", "streuf", "streven", "striek", "strieken", "striektaol", "strien", "strijen", "strijt", "strik", "strikken", "strikplank", "strikt", "strikvragen", "string", "stro", "stroef", "stroentbult", "stromend", "stromende", "strompelen", "strong", "stroofde", "strooien", "stroom", "strozak", "strozakken", "strukelen", "studie", "stuft", "stuiterden", "stukkien", "stukkies", "stunend", "sturen", "sturm", "sturmde", "sturmt", "sturven", "stute", "stuuf", "stuun", "stuunklimpies", "stuunt", "stuur", "stuurboord", "stuurboorskaant", "stuurde", "stuurkast", "stuurkessien", "stuurloos", "stuurmansdiploma", "stuven", "succes", "suf", "suker", "sukkelao", "sukkelaodemelk", "sukker", "sukkerei", "sukkereiwaoter", "sukkerzak", "sunlightziep", "sunter", "sunterdeklaos", "sunterklaos", "suurp", "tafellao", "tafeltjen", "tafelzeltjen", "takke", "takkeltjen", "talma", "tanen", "taol", "taoleagen", "taolen", "taolgebied", "taote", "taotes", "targend", "teaken", "teakenen", "teakeningen", "teakes", "teaket", "tebee", "tebeen", "tedelijke", "teden", "teed", "teedjen", "tegelik", "tegeltjesmarkt", "tegemoet", "tegen", "tegenkomen", "tegenwoordige", "tekeer", "tekkien", "tekort", "tekortkoemingen", "tekst", "tel", "telde", "teleuresteld", "telfout", "telinten", "tellen", "telt", "temet", "teminsen", "teminste", "tempelzalen", "ten", "teneande", "ter", "terecht", "terechte", "terogge", "teroggereaze", "terogweg", "terskelling", "terskiller", "terskilling", "teruggeven", "terwijl", "terzede", "testemint", "teug", "teugen", "teugies", "teun", "teus", "teuskomst", "tevreden", "tevreen", "tevuul", "tevuurskeen", "thee", "theeblad", "theedoek", "theekuppies", "theelepeltjen", "theewaoter", "thermoskanne", "theus", "thuis", "tie", "tied", "tien", "tiene", "tienen", "ties", "tietjes", "tijd", "tijden", "tijen", "tikkelen", "tikken", "tikkien", "tikt", "tikte", "tilde", "tilden", "tillegram", "tillevisie", "timmerkist", "timmerluien", "timmerman", "timmerskuur", "timpelbouw", "tja", "tjoekerend", "tochten", "tochtige", "toegieven", "toelachte", "toeliep", "toeliet", "toelopen", "toemaar", "toen", "toenimt", "toepassen", "toer", "toeren", "toertochten", "toeskuuf", "toestand", "toestanden", "toestimming", "toesting", "toeter", "toeterblaozers", "toeterde", "toevallig", "togen", "toilet", "tolde", "tonge", "toniel", "tonne", "tonnetjen", "toon", "toonbank", "toonbinkien", "toonde", "top", "toren", "torenklokke", "torenstraot", "tot", "touwtjen", "touwtjes", "toverbal", "toverballen", "tradden", "tram", "trance", "trap", "traporgel", "trappe", "trappegat", "trappen", "tree", "treen", "treetjes", "treffen", "treft", "treiteren", "trek", "trekken", "trekkies", "trekt", "trekzelen", "trellelletjes", "treppien", "treurig", "trit", "trommeljen", "trommeltjen", "tronen", "troon", "troosteloze", "troostelozer", "troosten", "tropisch", "trots", "trouw", "trouwcadeau", "trouwden", "trouwe", "trouwen", "trouwes", "trui", "truitjen", "tsjonge", "tufte", "tuften", "tugen", "tugengas", "tugenin", "tugenkoemen", "tugenover", "tugenspreken", "tugenstander", "tugenwoordigeid", "tugenzin", "tugeswoordig", "tuks", "tunis", "tuppien", "turbulintie", "turen", "tussen", "tutte", "tuul", "tuurden", "twaolf", "tweefel", "twefelen", "twie", "twiedaans", "twiede", "twieduzed", "twielingbruur", "twien", "twientig", "twinkelden", "twintse", "ugen", "uien", "uissien", "ul", "uleken", "ulekies", "ulle", "ullekies", "ullen", "ullepen", "ulleplooister", "ulp", "ulpen", "ulpverlieners", "um", "umeur", "uppelde", "uren", "urenlank", "urgel", "urk", "urses", "ussien", "uufterig", "uur", "uurling", "uurlingen", "uurt", "uurtjen", "uurtjes", "uust", "uut", "vaar", "vakluien", "val", "vallen", "van", "vanacht", "vanaved", "vanbinnen", "vandage", "vandaor", "vandeen", "vandochted", "vandoon", "vandoor", "vanduur", "vaneut", "vang", "vangen", "vangst", "vangsten", "vangt", "vanien", "vanmiddag", "vannacht", "vanof", "vanwege", "vanzelf", "vanzelvers", "vaor", "vaoren", "vaort", "vaorteug", "vaozen", "varder", "vardere", "varderop", "varders", "vare", "varken", "varrekes", "varste", "varte", "vast", "vaste", "vasteboenden", "vasteklonken", "vaster", "vastouwen", "vaststelde", "vat", "vecht", "vechten", "vee", "veef", "veefintwientig", "veegde", "veel", "veen", "veertig", "vege", "veilig", "veilige", "veiligeid", "veiligeidsspeld", "veld", "velde", "velden", "veldwachter", "veluwe", "vemoeden", "venen", "veniendig", "veniendige", "ver-it", "verachtelijk", "verandering", "verangerd", "verangeren", "verangerige", "verangert", "verantwoorde", "veraol", "veraolen", "veraolenbundel", "veraoltjen", "verbaosd", "verbaosde", "verbaozing", "verbeten", "verbielige", "verbieten", "verbijstering", "verbliek", "verblieken", "verbliekt", "verblik", "verblikken", "verblikt", "verbouwerierde", "verbrouwerierd", "verdaagd", "verdaagde", "verdacht", "verdachts", "verdeat", "verdeaten", "verdeen", "verdellegen", "verderrevedieregie", "verdeusterd", "verdield", "verdiende", "verdienen", "verdiensten", "verdient", "verdoon", "verdriet", "verdrietig", "verdronken", "verdroogd", "verdwaosd", "verdween", "verdwenen", "verdwien", "verdwienen", "verdwint", "veren", "vereugt", "vereutzicht", "vergankelijkeid", "vergat", "vergatten", "vergeet", "vergeten", "vergiet", "vergieven", "vergiftiging", "verging", "vergit", "vergluuid", "vergrezen", "verhalen", "veriende", "verienige", "verjaordag", "verjaordagen", "verkade", "verkeerd", "verkeerde", "verkieken", "verklaoren", "verklaoring", "verklaoringen", "verklaort", "verklapt", "verkleuring", "verkluumd", "verkluumde", "verkocht", "verkoop", "verkopen", "verkopers", "verkraampd", "verlaoten", "verlegen", "verlegeneid", "verleiding", "verlekkerd", "verlet", "verleur", "verleuren", "verlichte", "verlieden", "verliep", "verloepen", "verlof", "verlosser", "verlost", "vermienigvuldig", "vermoedelijke", "vermonend", "verneumd", "vernozzelde", "vernutels", "veronger", "verongeren", "veroorzaakt", "verorige", "verpakt", "verraoderlijke", "verrassen", "verrassende", "verrassing", "verrassingen", "verrikt", "verroest", "verrot", "verrukkelijk", "versieren", "verskeenselen", "verskeien", "verskenen", "verskeut", "verskeuten", "verskien", "verskiet", "verskieten", "verskoond", "verskrikkelijk", "verskrikkelijke", "verskrikkelik", "verskrikt", "verskrikte", "verslag", "versliepen", "verslieten", "verslikte", "versloegen", "versnoepen", "verstaand", "verstaandelijke", "verstaandig", "verstaandige", "verstandouding", "verstaold", "verstaolt", "versteefd", "verstiend", "verstiende", "verstomde", "verstoon", "verstoord", "verstoorde", "verstoppen", "vertel", "verteld", "vertelde", "vertellen", "vertelt", "verteren", "vertonige", "vertrek", "vertrekken", "vertrokken", "vertrouwde", "vertrouwds", "vertrouwen", "vertugenwoordig", "veruit", "vervangen", "verveelde", "vervelen", "vervelend", "vervleug", "vervoer", "vervolg", "vervolgde", "vervolgen", "vervuulvoudigd", "verwacht", "verwachte", "verwachten", "verwachting", "verwachtte", "verwachtten", "verward", "verwarken", "verwiet", "verwind", "verwisseld", "verwittigden", "verwonderd", "verwonderlijk", "verzameld", "verzameling", "verzetjen", "verzichtig", "verzieker", "verziekeren", "verzitten", "verzuchting", "vesta", "vette", "veul", "veuls", "veur", "veusten", "veven", "vieg", "vienster", "vier", "vierde", "vierden", "viere", "vieren", "vierkaante", "viertien", "vies", "vieze", "vigt", "vijftien", "vijftig", "villa", "villen", "viltjen", "vindt", "vinger", "vingers", "vingertjen", "vinnig", "vint", "vintjen", "vis", "visite", "visnetjen", "vissen", "visserije", "visserijskappen", "visserijskoel", "visserluien", "visserman", "vissershanden", "vissersussien", "vissien", "vist", "visweek", "vlaag", "vlaam", "vlaggen", "vlak", "vlakke", "vlakte", "vlam", "vlammen", "vlammetjen", "vlear", "vleas", "vleaspannetjen", "vlees", "vlet", "vleug", "vleugen", "vliedeweek", "vlieg", "vliegen", "vliegende", "vliegteug", "vlierekien", "vliering", "vligt", "vloeitjen", "vloeken", "vloekend", "vloekte", "vloer", "vlogge", "vloot", "vlootjen", "vlot", "vlug", "vlugel", "vlugels", "vlukkies", "vocht", "vochtig", "voddezak", "voeden", "voegde", "voegels", "voegeltjes", "voegen", "voel", "voelde", "voelen", "voen", "voend", "voenden", "voenen", "voer", "voeren", "voering", "voerteug", "voet", "voeten", "voetstappen", "vol", "volezugen", "volgde", "volgden", "volgen", "volgende", "volges", "volharding", "volk", "volkoemen", "volkscultuur", "volkstuntjens", "volledig", "vollek", "volop", "vong", "vonk", "vooral", "voorbereiden", "voorlopig", "voort", "voortkwam", "voortvliegen", "vooruit", "voorzichtig", "voorzorg", "vor", "voral", "vorbij", "vordat", "vorderde", "voreenkanger", "voreerst", "vorgoed", "vorlopig", "vorst", "vorstverlet", "vort", "vortevleugen", "vortkwam", "vortvleugen", "voruit", "vorzichtig", "vouwde", "vrachtrijers", "vrachtvaorder", "vrage", "vragt", "vrat", "vratten", "vrede", "vredige", "vreemd", "vreemde", "vreemden", "vreems", "vreet", "vreten", "vreur", "vreuren", "vrezen", "vriend", "vriendelijk", "vriendelijke", "vries", "vriest", "vriezen", "vrij", "vrijdag", "vrijdags", "vrijdagsmiddes", "vrije", "vrijer", "vrijgezelle", "vrindelijk", "vrinden", "vrit", "vroef", "vroeg", "vroet", "vrolijk", "vrolluien", "vronger", "vrongerbank", "vrongertjen", "vrouwe", "vrouwenaoter", "vrouwenogen", "vrouwestem", "vrouwluien", "vrouwtjen", "vrouwtjes", "vul", "vullen", "vulleszak", "vunkies", "vuren", "vurige", "vurk", "vurken", "vurmt", "vurs", "vursien", "vursies", "vuul", "vuurbereidige", "vuurbereidigen", "vuurboet", "vuuresteld", "vuureut", "vuurin", "vuurjaor", "vuurkamer", "vuurkoemen", "vuurleesburdjen", "vuurlezen", "vuurof", "vuurop", "vuurover", "vuurpijl", "vuurrang", "vuurraoden", "vuurrooie", "vuurskeen", "vuurskip", "vuurskriften", "vuurspelde", "vuurstel", "vuurtjen", "vuurtoren", "vuurtorenwachte", "vuurval", "vuurwaarde", "vuurweek", "vuurwoord", "vuurzeggende", "vuurzien", "vuurzitter", "vuus", "vuust", "vörfde", "vörfden", "vörft", "vörven", "waakoend", "waand", "waanden", "waard", "waardeloos", "waarop", "waarskouwen", "wantrouwige", "waoler", "waor", "waorduur", "waore", "waoreid", "waorin", "waormie", "waoromme", "waoronger", "waorop", "waorover", "waorskouw", "waorskouwege", "waorskouwen", "waorskouwend", "waorvan", "waorvor", "waos", "waoter", "waoterbak", "waoterbalk", "waoterketel", "waoterketeltjen", "waoterleen", "waotermuur", "waotersporters", "wapperden", "wapperen", "waren", "wark", "warkaven", "warkelijk", "warkelijkeid", "warken", "warkieskoes", "warkieskoesen", "warking", "warkt", "warkte", "warm", "warme", "warmen", "warmer", "warms", "warmte", "warrekien", "warreld", "warreldjen", "warrige", "wartels", "was", "wasandjes", "wasketeltjen", "wassen", "wat", "watte", "wazzen", "we", "weafde", "weagerde", "weageren", "weanig", "weaven", "weeg", "weegskaol", "week", "weekien", "weekse", "ween", "weer", "weerstand", "weert", "weertjen", "wees", "weest", "weesvinger", "weet", "weg", "weg-eduken", "weg-egriepen", "wegbringen", "wegdoen", "wege", "wegen", "wegennet", "wegepoetst", "wegerien", "wegestopt", "wegevaagd", "wegezakt", "wegezet", "wegezonken", "weggetjen", "weggetjes", "wegglijen", "wegrien", "wegtrekken", "wegwarken", "wegzinken", "weide", "weken", "wekien", "wekies", "wekker", "welders", "welgemiende", "welgevallen", "welleke", "wellekom", "wellicht", "wellinnik", "wellint", "wenen", "wer", "westkaant", "wet", "weten", "wetouwer", "weufde", "weze", "wezen", "wezer", "wezers", "wie", "wiebelen", "wiedervaoren", "wiederwaordiged", "wiedevrouwenoed", "wiege", "wiegen", "wiegetjen", "wiek", "wiend", "wiende", "wienden", "wienderige", "wiendvlaag", "wiendvoontjen", "wientemacht", "wienter", "wienterdag", "wientertjen", "wier", "wierders", "wieromme", "wierouwen", "wierslag", "wierspiegelde", "wierstoon", "wierwoord", "wies", "wiesmaken", "wiet", "wieten", "wietenskappelijk", "wietenswaordig", "wieven", "wiezen", "wiezer", "wigt", "wije", "wijk", "wil", "wild", "wilde", "wink", "winkbrauwen", "winkel", "winkelbelletjen", "winkelduur", "winkeliers", "winkellao", "winkelreut", "winkelrimpies", "winkelrutjen", "winkeltjen", "winkelveraoltje", "winkte", "wins", "winsen", "winste", "wip", "wisse", "wist", "wisten", "wit-iet", "woeg", "woegen", "woen", "woende", "woenden", "woenen", "woeniesdag", "woeniesdagaved", "woent", "woest", "wolken", "wolle", "wollekenflarden", "wollen", "wonder", "wonderlijke", "wondermiddel", "woord", "woordjen", "worde", "worren", "worstelen", "worsten", "wortels", "wou", "wouen", "wouwen", "wraak", "wrak", "wrief", "wrift", "wupneuze", "wuppen", "wurm", "wurmde", "wursies", "z'n", "zaan", "zaand", "zaandaoze", "zaanderig", "zaandgroenden", "zaanstriek", "zaar", "zacht", "zachte", "zaddoek", "zage", "zagen", "zaggen", "zagt", "zakien", "zakkezwieper", "zaoterdagaved", "zaoterdagochted", "zaoterdags", "zaoterdagsmiddag", "zare", "zarigeid", "zarken", "zatten", "zeal", "zealde", "zealemakerije", "zealen", "zealer", "zealers", "zealkooien", "zealt", "zealtocht", "zede", "zedelbanken", "zee", "zeegen", "zeen", "zege", "zegen", "zeiknat", "zekkien", "zelfvoldoon", "zellef", "zellefde", "zeltjen", "zelve", "zenen", "zesinvijftig", "zesse", "zessen", "zestiende", "zet", "zetgange", "zette", "zeug", "zeugen", "zeulen", "zeunig", "zeutjen", "zeuvere", "zicht", "zichtbaor", "zie", "ziekeneus", "ziekeneuslocht", "ziekenneus", "ziekenzaol", "zieker", "ziekereid", "ziekte", "ziel", "zienewachtig", "zienewen", "ziep", "zieroverije", "zieziekte", "zigt", "zimloodjes", "zinder", "zinderde", "zindingsbazar", "zoas", "zocht", "zochten", "zodaor", "zodat", "zoderekt", "zodoende", "zoeker", "zoeklichten", "zoekt", "zoemer", "zoemeraved", "zoemerdag", "zoemers", "zogt", "zok", "zokke", "zolange", "zolder", "zolderbalk", "zolderkamertjen", "zoldertjen", "zoldertrappe", "zoldertreppien", "zonger", "zouen", "zugen", "zugt", "zuien", "zuk", "zukken", "zukt", "zulie", "zuter", "zuug", "zuundag", "zuundagaved", "zuundageenaved", "zuundagen", "zuundagochted", "zuundags", "zuundes", "zuundese", "zuurwaoterfilosoof", "zuutjes", "zuutjesan", "zuutjezer", "zuven", "zuvene", "zuvenintwientig", "zuventien", "zwaardaak", "zwaardklaamp", "zwaardoge", "zwager", "zwakeid", "zwaoi", "zwaoide", "zwaoiende", "zwaor", "zwaore", "zwaorte", "zwarm", "zwarpien", "zweeg", "zwegen", "zwegend", "zwiefde", "zwiefden", "zwiefvliegteug", "zwieg", "zwiegen", "zwiep", "zwiepen", "zwieper", "zwiepte", "zwierden", "zwieren", "zwiet", "zwieven", "zwigt", "zwikkien", "zwim", "zwimbroek", "zwimmen", "zwimt", "zwimvest", "zwom", "zwommen", "zwoneaals", "zwurfden", "zwurven", "öffien", "öffies", "örfenisse", "örfenissien", "örgel", "örgelbank", "örgelbinkien", "örgeltjen", "örses", "ört", "örten", "örven"];
+
+const searchInput = document.getElementById('search');
+const countEl     = document.getElementById('count');
+const emptyEl     = document.getElementById('empty');
+const emptyQuery  = document.getElementById('empty-query');
+const resetBtn    = document.getElementById('reset-btn');
+const lettersEl   = document.getElementById('letters');
+const grid        = document.getElementById('word-grid');
+
+let activeLetter = null;
+let activeMode   = 'begint';
+
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeMode = btn.dataset.mode;
+    render();
+  });
+});
+
+const letters = [...new Set(WORDS.map(w => w[0].toUpperCase()))].sort();
+letters.forEach(l => {
+  const btn = document.createElement('button');
+  btn.className = 'letter-btn';
+  btn.textContent = l;
+  btn.addEventListener('click', () => {
+    if (activeLetter === l) {
+      activeLetter = null;
+      btn.classList.remove('active');
+    } else {
+      document.querySelectorAll('.letter-btn.active').forEach(b => b.classList.remove('active'));
+      activeLetter = l;
+      btn.classList.add('active');
+    }
+    searchInput.value = '';
+    render();
+  });
+  lettersEl.appendChild(btn);
+});
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function highlight(word, q, mode) {
+  if (!q) return escHtml(word);
+  const safe = q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  let re;
+  if (mode === 'begint')  re = new RegExp(`^(${safe})`, 'i');
+  else if (mode === 'eindigt') re = new RegExp(`(${safe})$`, 'i');
+  else re = new RegExp(`(${safe})`, 'gi');
+  return escHtml(word).replace(re, '<mark>$1</mark>');
+}
+
+function matches(word, q, mode) {
+  if (!q) return true;
+  const w = word.toLowerCase(), s = q.toLowerCase();
+  if (mode === 'begint')  return w.startsWith(s);
+  if (mode === 'eindigt') return w.endsWith(s);
+  return w.includes(s);
+}
+
+function render() {
+  const q = searchInput.value.trim();
+  const filtered = WORDS.filter(w => {
+    const lm = !activeLetter || w[0].toUpperCase() === activeLetter;
+    return lm && matches(w, q, activeMode);
+  });
+
+  countEl.textContent = filtered.length.toLocaleString('nl-NL');
+  resetBtn.style.display = (q || activeLetter) ? 'inline' : 'none';
+  emptyEl.style.display  = filtered.length === 0 ? 'block' : 'none';
+  grid.style.display     = filtered.length === 0 ? 'none' : 'block';
+  emptyQuery.textContent = q || activeLetter || '';
+
+  grid.innerHTML = filtered
+    .map(w => `<span class="word-item">${highlight(w, q, activeMode)}</span>`)
+    .join('');
+}
+
+searchInput.addEventListener('input', () => {
+  if (searchInput.value) {
+    activeLetter = null;
+    document.querySelectorAll('.letter-btn.active').forEach(b => b.classList.remove('active'));
+  }
+  render();
+});
+
+resetBtn.addEventListener('click', () => {
+  searchInput.value = '';
+  activeLetter = null;
+  document.querySelectorAll('.letter-btn.active').forEach(b => b.classList.remove('active'));
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
