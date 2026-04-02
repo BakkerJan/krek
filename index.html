@@ -183,23 +183,67 @@
       .mode-btn { padding: 0 0.5rem; font-size: 0.75rem; }
     }
 
+    /* ── Woord van de dag ── */
+    #wvd {
+      background: white;
+      border: 2px solid #dde4ef;
+      border-radius: 12px;
+      padding: 1.1rem 1.4rem;
+      margin-bottom: 1.4rem;
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    #wvd-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #e2001a;
+      white-space: nowrap;
+    }
+
+    #wvd-word {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #0d3b6e;
+    }
+
+    #wvd-mv {
+      font-size: 1rem;
+      color: #6b7a90;
+    }
+
+    /* ── Word items ── */
     .word-item {
       break-inside: avoid;
       background: white;
       border: 1.5px solid #dde4ef;
       border-radius: 7px;
-      padding: 0.45rem 0.8rem;
+      padding: 0.4rem 0.8rem;
       margin-bottom: 0.45rem;
       font-size: 0.93rem;
       color: #0d3b6e;
       font-weight: 500;
-      display: block;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.5rem;
       transition: border-color 0.12s, box-shadow 0.12s;
     }
 
     .word-item:hover {
       border-color: #1565a8;
       box-shadow: 0 2px 6px rgba(21,101,168,0.1);
+    }
+
+    .word-item .mv {
+      font-size: 0.78rem;
+      font-weight: 400;
+      color: #9aa5b4;
+      white-space: nowrap;
     }
 
     mark {
@@ -252,6 +296,13 @@
 <span class="wave" aria-hidden="true"></span>
 
 <main>
+  <!-- Woord van de dag -->
+  <div id="wvd">
+    <span id="wvd-label">Woord van de dag</span>
+    <span id="wvd-word"></span>
+    <span id="wvd-mv"></span>
+  </div>
+
   <div class="search-row">
     <div class="search-wrap">
       <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -319,25 +370,35 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
   });
 });
 
-const letters = [...new Set(WORDS.map(w => w[0].toUpperCase()))].sort();
-letters.forEach(l => {
-  const btn = document.createElement('button');
-  btn.className = 'letter-btn';
-  btn.textContent = l;
-  btn.addEventListener('click', () => {
-    if (activeLetter === l) {
-      activeLetter = null;
-      btn.classList.remove('active');
-    } else {
-      document.querySelectorAll('.letter-btn.active').forEach(b => b.classList.remove('active'));
-      activeLetter = l;
-      btn.classList.add('active');
-    }
-    searchInput.value = '';
-    render();
+function buildLetterButtons() {
+  const letters = [...new Set(WORDS.map(e => e.w[0].toUpperCase()))].sort();
+  letters.forEach(l => {
+    const btn = document.createElement('button');
+    btn.className = 'letter-btn';
+    btn.textContent = l;
+    btn.addEventListener('click', () => {
+      if (activeLetter === l) {
+        activeLetter = null;
+        btn.classList.remove('active');
+      } else {
+        document.querySelectorAll('.letter-btn.active').forEach(b => b.classList.remove('active'));
+        activeLetter = l;
+        btn.classList.add('active');
+      }
+      searchInput.value = '';
+      render();
+    });
+    lettersEl.appendChild(btn);
   });
-  lettersEl.appendChild(btn);
-});
+}
+
+function showWordVanDeDag() {
+  const nouns = WORDS.filter(e => e.mv);
+  const day   = Math.floor(Date.now() / 86400000); // days since epoch
+  const entry = nouns[day % nouns.length];
+  document.getElementById('wvd-word').textContent = entry.w;
+  document.getElementById('wvd-mv').textContent   = entry.mv ? '→ ' + entry.mv : '';
+}
 
 function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -363,9 +424,9 @@ function matches(word, q, mode) {
 
 function render() {
   const q = searchInput.value.trim();
-  const filtered = WORDS.filter(w => {
-    const lm = !activeLetter || w[0].toUpperCase() === activeLetter;
-    return lm && matches(w, q, activeMode);
+  const filtered = WORDS.filter(e => {
+    const lm = !activeLetter || e.w[0].toUpperCase() === activeLetter;
+    return lm && matches(e.w, q, activeMode);
   });
 
   countEl.textContent = filtered.length.toLocaleString('nl-NL');
@@ -374,9 +435,10 @@ function render() {
   grid.style.display     = filtered.length === 0 ? 'none' : 'block';
   emptyQuery.textContent = q || activeLetter || '';
 
-  grid.innerHTML = filtered
-    .map(w => `<span class="word-item">${highlight(w, q, activeMode)}</span>`)
-    .join('');
+  grid.innerHTML = filtered.map(e => {
+    const mvHtml = e.mv ? `<span class="mv">${escHtml(e.mv)}</span>` : '';
+    return `<span class="word-item">${highlight(e.w, q, activeMode)}${mvHtml}</span>`;
+  }).join('');
 }
 
 searchInput.addEventListener('input', () => {
@@ -398,6 +460,8 @@ fetch('words.json')
   .then(r => r.json())
   .then(data => {
     WORDS = data;
+    buildLetterButtons();
+    showWordVanDeDag();
     render();
   })
   .catch(() => {
