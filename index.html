@@ -3,290 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Urker Woordenboek</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: #f0f4f8;
-      color: #1a2332;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+  <title>Urker Woordenboek | Prumpien</title>
+  <meta name="description" content="Doorzoek het Urker woordenboek met duizenden dialectwoorden, meervoudsvormen en snelle filters." />
+  <link rel="canonical" href="https://prumpien.nl/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="nl_NL" />
+  <meta property="og:title" content="Urker Woordenboek" />
+  <meta property="og:description" content="Woorden in het Urker dialect, met zoekfilters en woord van de dag." />
+  <meta property="og:url" content="https://prumpien.nl/" />
+  <meta property="og:site_name" content="Urker Woordenboek" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Ctext x=%2232%22 y=%2250%22 text-anchor=%22middle%22 font-size=%2248%22%3E%F0%9F%93%96%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Urker Woordenboek",
+      "url": "https://prumpien.nl/",
+      "inLanguage": "nl-NL",
+      "description": "Woorden in het Urker dialect"
     }
-
-    .stripe-band {
-      display: block;
-      width: 100%;
-      line-height: 0;
-    }
-
-    .stripe-band svg {
-      display: block;
-      width: 100%;
-    }
-
-    header {
-      background: linear-gradient(135deg, #0d3b6e 0%, #1565a8 60%, #1e90c3 100%);
-      color: white;
-      padding: 2rem 1.5rem 1.75rem;
-      text-align: center;
-      box-shadow: 0 4px 16px rgba(13,59,110,0.3);
-    }
-
-    header h1 {
-      font-size: clamp(1.4rem, 4vw, 2.2rem);
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      margin-bottom: 0.3rem;
-    }
-
-    header p {
-      font-size: 0.95rem;
-      opacity: 0.82;
-    }
-
-    .wave {
-      display: block;
-      width: 100%;
-      height: 28px;
-      background: #f0f4f8;
-      clip-path: ellipse(55% 100% at 50% 100%);
-    }
-
-    main {
-      flex: 1;
-      max-width: 1000px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 1.25rem 1rem 2.5rem;
-    }
-
-    .search-row {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 0.75rem;
-      align-items: stretch;
-    }
-
-    .search-wrap {
-      position: relative;
-      flex: 1;
-    }
-
-    .search-wrap svg {
-      position: absolute;
-      left: 0.9rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #6b7a90;
-      pointer-events: none;
-    }
-
-    #search {
-      width: 100%;
-      height: 100%;
-      padding: 0.75rem 1rem 0.75rem 2.6rem;
-      font-size: 1rem;
-      border: 2px solid #c9d6e3;
-      border-radius: 9px;
-      background: white;
-      color: #1a2332;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    #search:focus {
-      border-color: #1565a8;
-      box-shadow: 0 0 0 3px rgba(21,101,168,0.14);
-    }
-
-    .mode-group {
-      display: flex;
-      border: 2px solid #c9d6e3;
-      border-radius: 9px;
-      overflow: hidden;
-      background: white;
-    }
-
-    .mode-btn {
-      flex: 1;
-      padding: 0 0.85rem;
-      font-size: 0.82rem;
-      font-weight: 600;
-      background: white;
-      border: none;
-      border-right: 1px solid #c9d6e3;
-      color: #6b7a90;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.15s, color 0.15s;
-    }
-
-    .mode-btn:last-child { border-right: none; }
-    .mode-btn:hover { background: #f0f4f8; color: #1565a8; }
-    .mode-btn.active { background: #1565a8; color: white; }
-
-    .letters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.3rem;
-      margin-bottom: 1rem;
-    }
-
-    .letter-btn {
-      padding: 0.28rem 0.55rem;
-      font-size: 0.82rem;
-      font-weight: 600;
-      border: 2px solid #c9d6e3;
-      border-radius: 6px;
-      background: white;
-      color: #4a5568;
-      cursor: pointer;
-      min-width: 30px;
-      text-align: center;
-      transition: all 0.15s;
-    }
-
-    .letter-btn:hover { border-color: #1565a8; color: #1565a8; }
-    .letter-btn.active { background: #1565a8; border-color: #1565a8; color: white; }
-
-    .count-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.4rem 0;
-      margin-bottom: 0.75rem;
-      font-size: 0.88rem;
-      color: #4a5568;
-    }
-
-    #count { font-weight: 600; color: #1565a8; }
-
-    #reset-btn {
-      font-size: 0.85rem;
-      background: none;
-      border: none;
-      color: #1565a8;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-
-    #word-grid {
-      columns: 3;
-      column-gap: 0.6rem;
-    }
-
-    @media (max-width: 600px) {
-      #word-grid { columns: 2; }
-      .mode-btn { padding: 0 0.5rem; font-size: 0.75rem; }
-    }
-
-    /* ── Woord van de dag ── */
-    #wvd {
-      background: white;
-      border: 2px solid #dde4ef;
-      border-radius: 12px;
-      padding: 1.1rem 1.4rem;
-      margin-bottom: 1.4rem;
-      display: flex;
-      align-items: baseline;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    #wvd-label {
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #e2001a;
-      white-space: nowrap;
-    }
-
-    #wvd-word {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #0d3b6e;
-    }
-
-    #wvd-mv {
-      font-size: 1rem;
-      color: #6b7a90;
-    }
-
-    /* ── Word items ── */
-    .word-item {
-      break-inside: avoid;
-      background: white;
-      border: 1.5px solid #dde4ef;
-      border-radius: 7px;
-      padding: 0.4rem 0.8rem;
-      margin-bottom: 0.45rem;
-      font-size: 0.93rem;
-      color: #0d3b6e;
-      font-weight: 500;
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 0.5rem;
-      transition: border-color 0.12s, box-shadow 0.12s;
-    }
-
-    .word-item:hover {
-      border-color: #1565a8;
-      box-shadow: 0 2px 6px rgba(21,101,168,0.1);
-    }
-
-    .word-item .mv {
-      font-size: 0.78rem;
-      font-weight: 400;
-      color: #9aa5b4;
-      white-space: nowrap;
-    }
-
-    mark {
-      background: #fde68a;
-      border-radius: 2px;
-      padding: 0 1px;
-    }
-
-    #empty {
-      display: none;
-      text-align: center;
-      padding: 3rem 1rem;
-      color: #6b7a90;
-    }
-
-    #empty svg {
-      opacity: 0.3;
-      margin-bottom: 0.75rem;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    footer {
-      text-align: center;
-      padding: 1rem 1rem 1.25rem;
-      font-size: 0.8rem;
-      color: #9aa5b4;
-      background: #e8edf4;
-    }
-  </style>
+  </script>
 </head>
 <body>
-
 <div class="stripe-band"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="20" preserveAspectRatio="none">
-  <rect y="0"    width="100%" height="4.5" fill="#e2001a"/>
-  <rect y="4.5"  width="100%" height="1"   fill="#ffffff"/>
-  <rect y="5.5"  width="100%" height="4.5" fill="#e2001a"/>
-  <rect y="10"   width="100%" height="3"   fill="#ffffff"/>
-  <rect y="13"   width="100%" height="1.5" fill="#1a171b"/>
-  <rect y="14.5" width="100%" height="1"   fill="#ffffff"/>
+  <rect y="0" width="100%" height="4.5" fill="#e2001a"/>
+  <rect y="4.5" width="100%" height="1" fill="#ffffff"/>
+  <rect y="5.5" width="100%" height="4.5" fill="#e2001a"/>
+  <rect y="10" width="100%" height="3" fill="#ffffff"/>
+  <rect y="13" width="100%" height="1.5" fill="#1a171b"/>
+  <rect y="14.5" width="100%" height="1" fill="#ffffff"/>
   <rect y="15.5" width="100%" height="1.5" fill="#1a171b"/>
-  <rect y="17"   width="100%" height="3"   fill="#ffffff"/>
+  <rect y="17" width="100%" height="3" fill="#ffffff"/>
 </svg></div>
 
 <header>
@@ -296,177 +44,79 @@
 <span class="wave" aria-hidden="true"></span>
 
 <main>
-  <!-- Woord van de dag -->
-  <div id="wvd">
+  <section id="wvd" role="button" tabindex="0" aria-label="Woord van de dag toepassen als filter">
     <span id="wvd-label">Woord van de dag</span>
     <span id="wvd-word"></span>
     <span id="wvd-mv"></span>
-  </div>
+  </section>
 
-  <div class="search-row">
-    <div class="search-wrap">
-      <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-      <input id="search" type="search" placeholder="Zoek een woord&#x2026;" autocomplete="off" autofocus />
+  <section class="search-filters-section" aria-label="Zoekfilters">
+    <label for="search" class="search-label">Zoekwoord</label>
+    <div class="search-row">
+      <div class="search-wrap">
+        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input id="search" type="search" placeholder="Zoek een woord&#x2026;" autocomplete="off" autofocus />
+      </div>
+      <div class="mode-group" role="group" aria-label="Zoekmodus">
+        <button class="mode-btn" data-mode="bevat" aria-pressed="false" type="button">Bevat</button>
+        <button class="mode-btn" data-mode="begint" aria-pressed="false" type="button">Begint met</button>
+        <button class="mode-btn" data-mode="eindigt" aria-pressed="false" type="button">Eindigt op</button>
+      </div>
     </div>
-    <div class="mode-group">
-      <button class="mode-btn" data-mode="bevat">Bevat</button>
-      <button class="mode-btn active" data-mode="begint">Begint met</button>
-      <button class="mode-btn" data-mode="eindigt">Eindigt op</button>
+
+    <div class="filters-row">
+      <label for="sort-select">Sortering</label>
+      <select id="sort-select">
+        <option value="az">A-Z</option>
+        <option value="za">Z-A</option>
+      </select>
+      <label class="check-label"><input type="checkbox" id="only-plural" /> Alleen woorden met meervoud</label>
     </div>
-  </div>
+  </section>
 
-  <div class="letters" id="letters"></div>
+  <div class="letters" id="letters" role="group" aria-label="Filter op beginletter"></div>
 
-  <div class="count-bar">
+  <div class="count-bar" aria-live="polite" aria-atomic="true">
     <span><span id="count">0</span> woorden</span>
-    <button id="reset-btn" style="display:none">Wis filter</button>
+    <div class="count-actions">
+      <button id="reset-btn" style="display:none" type="button">Wis filters</button>
+    </div>
   </div>
 
-  <div id="word-grid"></div>
-  <div id="empty">
-    <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+  <div id="word-grid" aria-live="off"></div>
+  <button id="load-more" class="load-more" type="button" style="display:none">Laad meer</button>
+
+  <div id="empty" role="status" aria-live="polite" aria-atomic="true">
+    <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
       <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
     </svg>
     <p>Geen woorden gevonden voor &#x201C;<span id="empty-query"></span>&#x201D;</p>
   </div>
+
+  <section class="info-card" aria-label="Toelichting">
+    <h2>Over spelling en transcriptie</h2>
+    <p>De schrijfwijze volgt het woordenbestand zoals aangeleverd. Varianten en uitspraak kunnen lokaal verschillen.</p>
+  </section>
 </main>
 
 <footer>
   <div class="stripe-band" style="margin-bottom:0.85rem"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="20" preserveAspectRatio="none">
-  <rect y="0"    width="100%" height="4.5" fill="#e2001a"/>
-  <rect y="4.5"  width="100%" height="1"   fill="#ffffff"/>
-  <rect y="5.5"  width="100%" height="4.5" fill="#e2001a"/>
-  <rect y="10"   width="100%" height="3"   fill="#ffffff"/>
-  <rect y="13"   width="100%" height="1.5" fill="#1a171b"/>
-  <rect y="14.5" width="100%" height="1"   fill="#ffffff"/>
-  <rect y="15.5" width="100%" height="1.5" fill="#1a171b"/>
-  <rect y="17"   width="100%" height="3"   fill="#ffffff"/>
-</svg></div>
-  Urker taalschat &mdash; 5,803 woorden
+    <rect y="0" width="100%" height="4.5" fill="#e2001a"/>
+    <rect y="4.5" width="100%" height="1" fill="#ffffff"/>
+    <rect y="5.5" width="100%" height="4.5" fill="#e2001a"/>
+    <rect y="10" width="100%" height="3" fill="#ffffff"/>
+    <rect y="13" width="100%" height="1.5" fill="#1a171b"/>
+    <rect y="14.5" width="100%" height="1" fill="#ffffff"/>
+    <rect y="15.5" width="100%" height="1.5" fill="#1a171b"/>
+    <rect y="17" width="100%" height="3" fill="#ffffff"/>
+  </svg></div>
+  <p aria-live="polite" aria-atomic="true">Urker taalschat &mdash; <span id="total-count">laden...</span> woorden</p>
+  <p>Laatst bijgewerkt woordenlijst: <span id="words-updated">onbekend</span></p>
+  <p><a href="mailto:info@prumpien.nl?subject=Fout%20in%20Urker%20woordenboek">Meld een fout in een woord</a></p>
 </footer>
 
-<script>
-let WORDS = [];
-
-const searchInput = document.getElementById('search');
-const countEl     = document.getElementById('count');
-const emptyEl     = document.getElementById('empty');
-const emptyQuery  = document.getElementById('empty-query');
-const resetBtn    = document.getElementById('reset-btn');
-const lettersEl   = document.getElementById('letters');
-const grid        = document.getElementById('word-grid');
-
-let activeLetter = null;
-let activeMode   = 'begint';
-
-document.querySelectorAll('.mode-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeMode = btn.dataset.mode;
-    render();
-  });
-});
-
-function buildLetterButtons() {
-  const letters = [...new Set(WORDS.map(e => e.w[0].toUpperCase()))].sort();
-  letters.forEach(l => {
-    const btn = document.createElement('button');
-    btn.className = 'letter-btn';
-    btn.textContent = l;
-    btn.addEventListener('click', () => {
-      if (activeLetter === l) {
-        activeLetter = null;
-        btn.classList.remove('active');
-      } else {
-        document.querySelectorAll('.letter-btn.active').forEach(b => b.classList.remove('active'));
-        activeLetter = l;
-        btn.classList.add('active');
-      }
-      searchInput.value = '';
-      render();
-    });
-    lettersEl.appendChild(btn);
-  });
-}
-
-function showWordVanDeDag() {
-  const nouns = WORDS.filter(e => e.mv);
-  const day   = Math.floor(Date.now() / 86400000); // days since epoch
-  const entry = nouns[day % nouns.length];
-  document.getElementById('wvd-word').textContent = entry.w;
-  document.getElementById('wvd-mv').textContent   = entry.mv ? '→ ' + entry.mv : '';
-}
-
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function highlight(word, q, mode) {
-  if (!q) return escHtml(word);
-  const safe = q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  let re;
-  if (mode === 'begint')  re = new RegExp(`^(${safe})`, 'i');
-  else if (mode === 'eindigt') re = new RegExp(`(${safe})$`, 'i');
-  else re = new RegExp(`(${safe})`, 'gi');
-  return escHtml(word).replace(re, '<mark>$1</mark>');
-}
-
-function matches(word, q, mode) {
-  if (!q) return true;
-  const w = word.toLowerCase(), s = q.toLowerCase();
-  if (mode === 'begint')  return w.startsWith(s);
-  if (mode === 'eindigt') return w.endsWith(s);
-  return w.includes(s);
-}
-
-function render() {
-  const q = searchInput.value.trim();
-  const filtered = WORDS.filter(e => {
-    const lm = !activeLetter || e.w[0].toUpperCase() === activeLetter;
-    return lm && matches(e.w, q, activeMode);
-  });
-
-  countEl.textContent = filtered.length.toLocaleString('nl-NL');
-  resetBtn.style.display = (q || activeLetter) ? 'inline' : 'none';
-  emptyEl.style.display  = filtered.length === 0 ? 'block' : 'none';
-  grid.style.display     = filtered.length === 0 ? 'none' : 'block';
-  emptyQuery.textContent = q || activeLetter || '';
-
-  grid.innerHTML = filtered.map(e => {
-    const mvHtml = e.mv ? `<span class="mv">${escHtml(e.mv)}</span>` : '';
-    return `<span class="word-item"><span>${highlight(e.w, q, activeMode)}</span>${mvHtml}</span>`;
-  }).join('');
-}
-
-searchInput.addEventListener('input', () => {
-  if (searchInput.value) {
-    activeLetter = null;
-    document.querySelectorAll('.letter-btn.active').forEach(b => b.classList.remove('active'));
-  }
-  render();
-});
-
-resetBtn.addEventListener('click', () => {
-  searchInput.value = '';
-  activeLetter = null;
-  document.querySelectorAll('.letter-btn.active').forEach(b => b.classList.remove('active'));
-  render();
-});
-
-fetch('words.json')
-  .then(r => r.json())
-  .then(data => {
-    WORDS = data;
-    buildLetterButtons();
-    showWordVanDeDag();
-    render();
-  })
-  .catch(() => {
-    grid.innerHTML = '<p style="color:#c62828;padding:1rem">Kon words.json niet laden.</p>';
-  });
-</script>
+<script src="app.js" defer></script>
 </body>
 </html>
