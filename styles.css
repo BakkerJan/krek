@@ -345,6 +345,7 @@ footer {
 
 footer p + p { margin-top: 0.35rem; }
 footer a { color: #0d3b6e; }
+.error-message { color: #c62828; padding: 1rem; }
 
 @media (max-width: 700px) {
   .search-row { flex-direction: column; }

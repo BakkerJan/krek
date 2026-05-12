@@ -301,6 +301,13 @@ function formatUpdatedDate(lastModified) {
   return d.toLocaleDateString('nl-NL');
 }
 
+function isValidWordEntry(entry) {
+  return entry
+    && typeof entry.w === 'string'
+    && entry.w.trim()
+    && (entry.mv === undefined || typeof entry.mv === 'string');
+}
+
 async function init() {
   loadState();
   updateModeButtons();
@@ -315,7 +322,7 @@ async function init() {
     }
 
     WORDS = data
-      .filter(e => e && typeof e.w === 'string' && e.w.trim() && (e.mv === undefined || typeof e.mv === 'string'))
+      .filter(isValidWordEntry)
       .map(e => ({
         w: e.w.trim(),
         ...(e.mv && e.mv.trim() ? { mv: e.mv.trim() } : {})
@@ -332,7 +339,7 @@ async function init() {
     showWordVanDeDag();
     render();
   } catch (err) {
-    grid.innerHTML = `<p style="color:#c62828;padding:1rem">${escHtml(err?.message || 'Kon words.json niet laden.')}</p>`;
+    grid.innerHTML = `<p class="error-message">${escHtml(err?.message || 'Kon words.json niet laden.')}</p>`;
     grid.style.display = 'block';
     emptyEl.style.display = 'none';
     loadMoreBtn.style.display = 'none';
