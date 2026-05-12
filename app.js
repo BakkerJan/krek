@@ -339,7 +339,7 @@ async function init() {
     showWordVanDeDag();
     render();
   } catch (err) {
-    grid.innerHTML = `<p class="error-message">${escHtml(err?.message || 'Kon words.json niet laden.')}</p>`;
+    grid.innerHTML = `<p class="error-message">${escHtml(err?.message || 'Kon woordenlijst niet laden. Probeer de pagina te vernieuwen of neem contact op met de beheerder.')}</p>`;
     grid.style.display = 'block';
     emptyEl.style.display = 'none';
     loadMoreBtn.style.display = 'none';
